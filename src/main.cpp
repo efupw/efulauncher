@@ -159,48 +159,41 @@ class CurlGlobalInit
 bool file_checksum_test(const std::string &path,
         const std::string &checksum)
 {
-    auto md = EVP_sha1();
-    md = EVP_md5();
-    //const int md_len = SHA_DIGEST_LENGTH;
+#define md_md5
+#ifdef md_md5
+    auto md = EVP_md5();
     const int md_len = MD5_DIGEST_LENGTH;
+#else
+    auto md = EVP_sha1();
+    const int md_len = SHA_DIGEST_LENGTH;
+#endif
     unsigned char result[md_len];
-    FILE *f = fopen(path.c_str(), "rb");
-    size_t n;
-    EVP_MD_CTX *mdctx;
-    unsigned char buf[8192];
+    EVP_MD_CTX *mdctx = nullptr;
+    std::ifstream is(path, std::ifstream::binary);
 
+    const int length = 8192;
+    unsigned char buffer[length];
+    auto buf = reinterpret_cast<char *>(&buffer);
     mdctx = EVP_MD_CTX_create();
     EVP_DigestInit_ex(mdctx, md, nullptr);
-    while ((n = fread(buf, 1, sizeof(buf), f)) > 0)
+    while (is)
     {
-        EVP_DigestUpdate(mdctx, buf, n);
+        is.read(buf, length);
+        EVP_DigestUpdate(mdctx, buffer, is.gcount());
     }
     EVP_DigestFinal_ex(mdctx, result, nullptr);
     EVP_MD_CTX_destroy(mdctx);
-    std::string sss("\0", md_len * 2);
-    std::stringstream ssss;
-    //const char* const lut = "0123456789abcdef";
-    ssss << std::setfill('0');
+    std::stringstream calcsum;
+    calcsum << std::setfill('0');
     
-    for (int i = 0; i < md_len; ++i)
-    {
-        printf("%02x", result[i]);
-        //ssss << (lut[result[i] >> 4]) << (lut[result[i] & 15]);
-        //ssss << std::hex << std::setw(2) << static_cast<unsigned int>(result[i]);
-        sprintf(&sss[i * 2], "%02x", result[i]);
-    }
-    //ssss.str("");
-
     std::for_each(std::begin(result), std::end(result),
-            [&ssss](unsigned char c)
+            [&calcsum](unsigned char c)
             {
-            ssss << std::hex << std::setw(2) << static_cast<unsigned int>(c);
+            calcsum << std::hex << std::setw(2)
+            << static_cast<unsigned int>(c);
             });
-    std::cout << std::endl << md_len << std::endl;
-    std::string ssha(std::begin(result), std::end(result));
-    std::cout << sss << std::endl;
-    std::cout << ssss.str() << std::endl;
-    return ssss.str() == checksum;
+    std::cout << calcsum.str() << std::endl;
+    return calcsum.str() == checksum;
 }
 
 int main(int argc, char *argv[])
