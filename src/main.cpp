@@ -176,13 +176,13 @@ bool file_checksum_test(const std::string &path,
     std::array<unsigned char, length> buffer;
     auto buf = reinterpret_cast<char *>(buffer.data());
     mdctx = EVP_MD_CTX_create();
-    EVP_DigestInit_ex(mdctx, md, nullptr);
-    while (is)
+    int status = EVP_DigestInit_ex(mdctx, md, nullptr);
+    while (status && is)
     {
         is.read(buf, length);
-        EVP_DigestUpdate(mdctx, buffer.data(), is.gcount());
+        status = EVP_DigestUpdate(mdctx, buffer.data(), is.gcount());
     }
-    EVP_DigestFinal_ex(mdctx, result.data(), nullptr);
+    status = EVP_DigestFinal_ex(mdctx, result.data(), nullptr);
     EVP_MD_CTX_destroy(mdctx);
     std::stringstream calcsum;
     calcsum << std::setfill('0');
