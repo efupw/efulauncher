@@ -25,6 +25,8 @@ const std::string listing("http://nwn.efupw.com/rootdir/index.dat");
 const std::string patch_dir("http://nwn.efupw.com/rootdir/patch/");
 const std::string update_check("");
 
+std::string file_checksum(const std::string &path);
+
 size_t writefunction(const char *ptr, size_t size, size_t nmemb, void *userdata)
 {
     std::string *s = static_cast<std::string *>(userdata);
@@ -157,8 +159,7 @@ class CurlGlobalInit
         }
 };
 
-bool file_checksum_test(const std::string &path,
-        const std::string &checksum)
+std::string file_checksum(const std::string &path)
 {
 #define md_md5
 #ifdef md_md5
@@ -201,7 +202,7 @@ bool file_checksum_test(const std::string &path,
             });
             */
     std::cout << calcsum.str() << std::endl;
-    return calcsum.str() == checksum;
+    return calcsum.str();
 }
 
 int main(int argc, char *argv[])
@@ -291,7 +292,7 @@ int main(int argc, char *argv[])
     const std::string checksum("38eaad974c15e5f3119469f17e8e97a9");
     std::cout << "file checksum test: "
         << path << " = " << checksum
-        << " : " << file_checksum_test(path, checksum)
+        << " : " << (file_checksum(path) == checksum)
         << std::endl;
 
     std::cout << std::endl;
