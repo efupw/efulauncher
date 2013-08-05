@@ -18,4 +18,3 @@ build: $(sources)
 	$(cc) -o $(out) $(include) $(cflags) $(ldflags) $(ldlibs) $(sources)
 
 $(out): $(patsubst %.cpp,%.o,$(sources))
-	#$(cc) $(flags) main.cpp -o $(out)
