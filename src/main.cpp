@@ -187,12 +187,19 @@ bool file_checksum_test(const std::string &path,
     std::stringstream calcsum;
     calcsum << std::setfill('0');
     
+    for (unsigned char c : result)
+    {
+        calcsum << std::hex << std::setw(2)
+            << static_cast<unsigned int>(c);
+    }
+    /*
     std::for_each(std::begin(result), std::end(result),
             [&calcsum](unsigned char c)
             {
             calcsum << std::hex << std::setw(2)
             << static_cast<unsigned int>(c);
             });
+            */
     std::cout << calcsum.str() << std::endl;
     return calcsum.str() == checksum;
 }
