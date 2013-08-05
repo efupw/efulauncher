@@ -156,6 +156,53 @@ class CurlGlobalInit
         }
 };
 
+bool file_checksum_test(const std::string &path,
+        const std::string &checksum)
+{
+    auto md = EVP_sha1();
+    md = EVP_md5();
+    //const int md_len = SHA_DIGEST_LENGTH;
+    const int md_len = MD5_DIGEST_LENGTH;
+    unsigned char result[md_len];
+    FILE *f = fopen(path.c_str(), "rb");
+    size_t n;
+    EVP_MD_CTX *mdctx;
+    unsigned char buf[8192];
+
+    mdctx = EVP_MD_CTX_create();
+    EVP_DigestInit_ex(mdctx, md, nullptr);
+    while ((n = fread(buf, 1, sizeof(buf), f)) > 0)
+    {
+        EVP_DigestUpdate(mdctx, buf, n);
+    }
+    EVP_DigestFinal_ex(mdctx, result, nullptr);
+    EVP_MD_CTX_destroy(mdctx);
+    std::string sss("\0", md_len * 2);
+    std::stringstream ssss;
+    //const char* const lut = "0123456789abcdef";
+    ssss << std::setfill('0');
+    
+    for (int i = 0; i < md_len; ++i)
+    {
+        printf("%02x", result[i]);
+        //ssss << (lut[result[i] >> 4]) << (lut[result[i] & 15]);
+        //ssss << std::hex << std::setw(2) << static_cast<unsigned int>(result[i]);
+        sprintf(&sss[i * 2], "%02x", result[i]);
+    }
+    //ssss.str("");
+
+    std::for_each(std::begin(result), std::end(result),
+            [&ssss](unsigned char c)
+            {
+            ssss << std::hex << std::setw(2) << static_cast<unsigned int>(c);
+            });
+    std::cout << std::endl << md_len << std::endl;
+    std::string ssha(std::begin(result), std::end(result));
+    std::cout << sss << std::endl;
+    std::cout << ssss.str() << std::endl;
+    return ssss.str() == checksum;
+}
+
 int main(int argc, char *argv[])
 {
     CurlGlobalInit curl_global;
@@ -239,79 +286,13 @@ int main(int argc, char *argv[])
     {
         std::cout << "No targets out of date." << std::endl;
     }
+    const std::string path = "bin/override/spells.2da";
+    const std::string checksum("38eaad974c15e5f3119469f17e8e97a9");
+    std::cout << "file checksum test: "
+        << path << " = " << checksum
+        << " : " << file_checksum_test(path, checksum)
+        << std::endl;
 
-    auto md = EVP_sha1();
-    md = EVP_md5();
-    //const int md_len = SHA_DIGEST_LENGTH;
-    const int md_len = MD5_DIGEST_LENGTH;
-    unsigned char result[md_len];
-    FILE *f = fopen("efulauncher", "rb");
-    size_t n;
-    EVP_MD_CTX *mdctx;
-    unsigned char buf[8192];
-
-    mdctx = EVP_MD_CTX_create();
-    EVP_DigestInit_ex(mdctx, md, nullptr);
-    while ((n = fread(buf, 1, sizeof(buf), f)) > 0)
-    {
-        EVP_DigestUpdate(mdctx, buf, n);
-    }
-    EVP_DigestFinal_ex(mdctx, result, nullptr);
-    EVP_MD_CTX_destroy(mdctx);
-    std::string sss("\0", md_len * 2);
-    std::stringstream ssss;
-    //const char* const lut = "0123456789abcdef";
-    ssss << std::setfill('0');
-    
-    for (int i = 0; i < md_len; ++i)
-    {
-        printf("%02x", result[i]);
-        //ssss << (lut[result[i] >> 4]) << (lut[result[i] & 15]);
-        //ssss << std::hex << std::setw(2) << static_cast<unsigned int>(result[i]);
-        sprintf(&sss[i * 2], "%02x", result[i]);
-    }
-    //ssss.str("");
-
-    std::for_each(std::begin(result), std::end(result),
-            [&ssss](unsigned char c)
-            {
-            ssss << std::hex << std::setw(2) << static_cast<unsigned int>(c);
-            });
-    std::cout << std::endl << md_len << std::endl;
-    std::string ssha(std::begin(result), std::end(result));
-    std::cout << sss << std::endl;
-    std::cout << ssss.str() << std::endl;
-    //std::cout << std::ios::hex << ssha[10] << std::endl;
-
-    /*
-    SHA_CTX sha;
-    SHA1_Init(&sha);
-    f = fopen("dialog.tlk", "rb");
-    while ((n = fread(buf, 1, sizeof buf, f)) > 0)
-    {
-        SHA1_Update(&sha, buf, n);
-    }
-    fclose(f);
-    SHA1_Final(result, &sha);
-    for (int i = 0; i < SHA_DIGEST_LENGTH; ++i) { printf("%02x", result[i]); }
-    */
-
-
-    /*
-    struct stat statbuf;
-    fstat(fd, &statbuf);
-    unsigned long fs = statbuf.st_size;
-    char *fb = mmap(0,
-            fs, PROT_READ, MAP_SHARED,
-            fd,
-            0);
-    SHA1((unsigned char*)fb, fs, result);
-    munmap(fb, fs);
-    for (int i = 0; i < SHA_DIGEST_LENGTH; ++i)
-    {
-        printf("%02x", result[i]);
-    }
-    */
     std::cout << std::endl;
     return 0;
 }
