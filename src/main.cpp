@@ -172,14 +172,15 @@ bool file_checksum_test(const std::string &path,
     std::ifstream is(path, std::ifstream::binary);
 
     const int length = 8192;
-    unsigned char buffer[length];
-    auto buf = reinterpret_cast<char *>(&buffer);
+    //unsigned char buffer[length];
+    std::vector<unsigned char> buffer(length);
+    auto buf = reinterpret_cast<char *>(buffer.data());
     mdctx = EVP_MD_CTX_create();
     EVP_DigestInit_ex(mdctx, md, nullptr);
     while (is)
     {
         is.read(buf, length);
-        EVP_DigestUpdate(mdctx, buffer, is.gcount());
+        EVP_DigestUpdate(mdctx, buffer.data(), is.gcount());
     }
     EVP_DigestFinal_ex(mdctx, result, nullptr);
     EVP_MD_CTX_destroy(mdctx);
