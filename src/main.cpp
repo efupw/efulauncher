@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <array>
 #include <iomanip>
 #include <curl/curl.h>
 #include <memory>
@@ -167,13 +168,12 @@ bool file_checksum_test(const std::string &path,
     auto md = EVP_sha1();
     const int md_len = SHA_DIGEST_LENGTH;
 #endif
-    unsigned char result[md_len];
+    std::array<unsigned char, md_len> result;
     EVP_MD_CTX *mdctx = nullptr;
     std::ifstream is(path, std::ifstream::binary);
 
     const int length = 8192;
-    //unsigned char buffer[length];
-    std::vector<unsigned char> buffer(length);
+    std::array<unsigned char, length> buffer;
     auto buf = reinterpret_cast<char *>(buffer.data());
     mdctx = EVP_MD_CTX_create();
     EVP_DigestInit_ex(mdctx, md, nullptr);
@@ -182,7 +182,7 @@ bool file_checksum_test(const std::string &path,
         is.read(buf, length);
         EVP_DigestUpdate(mdctx, buffer.data(), is.gcount());
     }
-    EVP_DigestFinal_ex(mdctx, result, nullptr);
+    EVP_DigestFinal_ex(mdctx, result.data(), nullptr);
     EVP_MD_CTX_destroy(mdctx);
     std::stringstream calcsum;
     calcsum << std::setfill('0');
