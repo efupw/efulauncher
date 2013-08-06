@@ -71,9 +71,11 @@ class Target
         {
             std::cout << "pretending to fetch " << name() << std::endl;
             std::string path;
-            std::ofstream ofs(name());
-            if (!ofs.good())
+            std::fstream fs(name(), std::ios_base::in);
+            if (!fs.good())
             {
+                fs.close();
+                std::cout << " doesn't exist, creating new." << std::endl;
                 auto elems = split(name(), '/');
                 for (size_t i = 0, k = elems.size(); i < k; ++i)
                     //for (auto s : elems)
@@ -99,35 +101,37 @@ class Target
                         std::cout << "the path: " << path << std::endl;
                     }
                 }
-                ofs.open(path);
-                if (ofs.good())
+                fs.open(path, std::ios_base::out);
+                if (!fs.good())
                 {
-                    std::cout << "opened path " << path << std::endl;
+                    fs.close();
+                    std::cout << "Failed to create file: " << path << std::endl;
+                }
+                else
+                {
+                    fs.close();
+                    do_fetch();
+                    return;
+                    //std::cout << "opened path " << path << std::endl;
                 }
             }
-            if (ofs.good())
+            if (fs.good())
             {
-                const std::string md5("38eaad974c15e5f3119469f17e8e97a9");
-                //if (md5 != checksum())
+                fs.close();
+                //const std::string calcsum(file_checksum(name()));
+                /*
+                std::cout << "calced sum for " << name()
+                    << " : " << calcsum << ", expected " << checksum() << std::endl;
+                    */
+                //if (calcsum == checksum())
+                if (status() == Status::Current)
                 {
-                    std::cout << "Downloading new " << name() << std::endl;
-                    std::string s;
-                    std::shared_ptr<CURL *> phandle =
-                        std::make_shared<CURL *>(curl_easy_init());
-                    std::string url(patch_dir + name());
-                    curl_easy_setopt(*phandle, CURLOPT_URL, url.c_str());
-                    curl_easy_setopt(*phandle, CURLOPT_WRITEFUNCTION, &writefunction);
-                    curl_easy_setopt(*phandle, CURLOPT_WRITEDATA, &s);
-                    //curl_easy_setopt(*phandle, CURLOPT_NOPROGRESS, 0);
-                    curl_easy_perform(*phandle);
-                    curl_easy_cleanup(*phandle);
-                    phandle.reset();
-                    ofs << s;
-                    ofs.close();
+                    std::cout << " already up to date." << std::endl;
                 }
-                //else
+                else
                 {
-                    std::cout << name() << " already up to date." << std::endl;
+                    std::cout << " outdated, downloading new." << std::endl;
+                    do_fetch();
                 }
             }
         }
@@ -151,6 +155,31 @@ class Target
         }
 
     private:
+        void do_fetch()
+        {
+            std::string s;
+            std::shared_ptr<CURL *> phandle =
+                std::make_shared<CURL *>(curl_easy_init());
+            std::string url(patch_dir + name());
+            curl_easy_setopt(*phandle, CURLOPT_URL, url.c_str());
+            curl_easy_setopt(*phandle, CURLOPT_WRITEFUNCTION, &writefunction);
+            curl_easy_setopt(*phandle, CURLOPT_WRITEDATA, &s);
+            //curl_easy_setopt(*phandle, CURLOPT_NOPROGRESS, 0);
+            curl_easy_perform(*phandle);
+            curl_easy_cleanup(*phandle);
+            phandle.reset();
+            std::ofstream ofs(name());
+            if (ofs.good())
+            {
+                ofs << s;
+                ofs.close();
+            }
+            else
+            {
+                std::cout << "Couldn't write to " << name() << std::endl;
+            }
+        }
+
         std::string m_name;
         std::string m_checksum;
 };
