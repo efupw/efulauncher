@@ -292,14 +292,6 @@ int main(int argc, char *argv[])
         {
             old_targets.push_back(std::move(t));
         }
-        //std::cout << *beg << std::endl;
-    }
-    std::stringstream ss(fetch);
-    std::string item;
-    //std::vector<std::pair<std::string, std::string>> new_targets;
-    while (std::getline(ss, item))
-    {
-        //new_targets.push_back(item);
     }
     if (new_targets.size())
     {
@@ -309,23 +301,15 @@ int main(int argc, char *argv[])
             //std::cout << t << std::endl;
             //t.fetch();
         }
-        std::cout << new_targets[4] << std::endl;
-        new_targets[1].fetch();
-        new_targets[4].fetch();
-        /*
-        for (auto s : split(new_targets[4].name(), '/'))
-        {
-            if (s.length())
-            {
-                std::cout << s << ", ";
-            }
-        }
-        */
+        //std::cout << new_targets[4] << std::endl;
+        new_targets[0].fetch();
+        //new_targets[4].fetch();
     }
     else
     {
         std::cout << "No new targets." << std::endl;
     }
+
     if (old_targets.size())
     {
         std::cout << "Outdated targets: " << old_targets.size() << std::endl;
@@ -338,13 +322,15 @@ int main(int argc, char *argv[])
     {
         std::cout << "No targets out of date." << std::endl;
     }
+
+    /*
     const std::string path = "bin/override/spells.2da";
     const std::string checksum("38eaad974c15e5f3119469f17e8e97a9");
     std::cout << "file checksum test: "
         << path << " = " << checksum
         << " : " << (file_checksum(path) == checksum)
         << std::endl;
-
+    */
     std::cout << std::endl;
     return 0;
 }
