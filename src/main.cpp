@@ -145,7 +145,7 @@ class Target
                 return Status::Nonexistent;
             }
             is.close();
-            const std::string calcsum(file_checksum(name()));
+            auto calcsum(file_checksum(name()));
             if (calcsum == checksum())
             {
                 return Status::Current;
