@@ -61,10 +61,10 @@ class Target
             Current
         };
         explicit Target(const std::string &name, const std::string &checksum):
-            m_name(name.find_first_of('/') == std::string::npos ?
-                    name
-                    : name, name.find_first_of('/') + 1, name.size() - 1), m_checksum(checksum)
-    {}
+            m_name(name.find_first_of('/') == std::string::npos ? name :
+                    name, name.find_first_of('/') + 1, name.size() - 1),
+            m_checksum(checksum)
+            {}
         std::string name() const { return m_name; }
         const std::string checksum() const { return m_checksum; }
 
