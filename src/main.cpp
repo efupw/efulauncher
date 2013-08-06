@@ -79,7 +79,6 @@ class Target
                 std::cout << " doesn't exist, creating new." << std::endl;
                 auto elems = split(name(), '/');
                 for (size_t i = 0, k = elems.size(); i < k; ++i)
-                    //for (auto s : elems)
                 {
                     const std::string &s(elems[i]);
                     if (s.size() && s != ".")
@@ -100,7 +99,6 @@ class Target
                                 }
                             }
                         }
-                        //std::cout << "the path: " << path << std::endl;
                     }
                 }
                 fs.open(path, std::ios_base::out);
@@ -114,18 +112,11 @@ class Target
                     fs.close();
                     do_fetch();
                     return;
-                    //std::cout << "opened path " << path << std::endl;
                 }
             }
             if (fs.good())
             {
                 fs.close();
-                //const std::string calcsum(file_checksum(name()));
-                /*
-                std::cout << "calced sum for " << name()
-                    << " : " << calcsum << ", expected " << checksum() << std::endl;
-                    */
-                //if (calcsum == checksum())
                 if (status() == Status::Current)
                 {
                     std::cout << " already up to date." << std::endl;
@@ -224,10 +215,6 @@ const std::string file_checksum(const std::string &path)
            << " for checksumming." << std::endl;
         return std::string();
     }
-    else
-    {
-        //std::cout << "opened file " << path << std::endl;
-    }
 
     const int length = 8192;
     std::array<unsigned char, length> buffer;
@@ -257,7 +244,7 @@ const std::string file_checksum(const std::string &path)
             << static_cast<unsigned int>(c);
             });
             */
-    //std::cout << calcsum.str() << std::endl;
+
     return calcsum.str();
 }
 
@@ -273,10 +260,8 @@ int main(int argc, char *argv[])
     curl_easy_perform(*phandle);
     curl_easy_cleanup(*phandle);
     phandle.reset();
-    //std::cout << fetch << std::endl;
+
     std::vector<std::string> lines(split(fetch, '\n'));
-    //split(fetch, '\n', lines);
-    //std::cout << lines[1] << std::endl;
     std::vector<Target> new_targets, old_targets;
     for (auto beg = std::begin(lines), end = std::end(lines);
             beg != end; ++beg)
@@ -301,9 +286,6 @@ int main(int argc, char *argv[])
             std::cout << "- " << t << std::endl;
             //t.fetch();
         }
-        //std::cout << new_targets[4] << std::endl;
-        new_targets[0].fetch();
-        //new_targets[4].fetch();
     }
     else
     {
@@ -323,14 +305,6 @@ int main(int argc, char *argv[])
         std::cout << "No targets out of date." << std::endl;
     }
 
-    /*
-    const std::string path = "bin/override/spells.2da";
-    const std::string checksum("38eaad974c15e5f3119469f17e8e97a9");
-    std::cout << "file checksum test: "
-        << path << " = " << checksum
-        << " : " << (file_checksum(path) == checksum)
-        << std::endl;
-    */
     std::cout << std::endl;
     return 0;
 }
