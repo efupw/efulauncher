@@ -85,7 +85,8 @@ class Target
                     if (s.size() && s != ".")
                     {
                         path.append((i > 0 ? "/" : "") + s);
-                        if (k > 1 && i < k - 1)
+                        // i indicates a directory.
+                        if (i < k - 1)
                         {
                             auto status = mkdir(path.c_str(), S_IRWXU);
                             if (status == -1)
