@@ -284,7 +284,7 @@ int main(int argc, char *argv[])
         for (auto &t : new_targets)
         {
             std::cout << "- " << t << std::endl;
-            //t.fetch();
+            t.fetch();
         }
     }
     else
@@ -298,6 +298,7 @@ int main(int argc, char *argv[])
         for (auto &t : old_targets)
         {
             std::cout << "- " << t << std::endl;
+            t.fetch();
         }
     }
     else
