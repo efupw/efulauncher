@@ -67,9 +67,10 @@ class Target
     {}
         std::string name() const { return m_name; }
         std::string checksum() const { return m_checksum; }
+
         void fetch()
         {
-            std::cout << "pretending to fetch " << name() << std::endl;
+            std::cout << "Statting target " << name() << "...";
             std::string path;
             std::fstream fs(name(), std::ios_base::in);
             if (!fs.good())
@@ -98,7 +99,7 @@ class Target
                                 }
                             }
                         }
-                        std::cout << "the path: " << path << std::endl;
+                        //std::cout << "the path: " << path << std::endl;
                     }
                 }
                 fs.open(path, std::ios_base::out);
