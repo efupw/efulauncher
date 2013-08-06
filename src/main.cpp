@@ -25,7 +25,7 @@ const std::string listing("http://nwn.efupw.com/rootdir/index.dat");
 const std::string patch_dir("http://nwn.efupw.com/rootdir/patch/");
 const std::string update_check("");
 
-std::string file_checksum(const std::string &path);
+const std::string file_checksum(const std::string &path);
 
 size_t writefunction(const char *ptr, size_t size, size_t nmemb, void *userdata)
 {
@@ -66,7 +66,7 @@ class Target
                     : name, name.find_first_of('/') + 1, name.size() - 1), m_checksum(checksum)
     {}
         std::string name() const { return m_name; }
-        std::string checksum() const { return m_checksum; }
+        const std::string checksum() const { return m_checksum; }
 
         void fetch()
         {
@@ -205,7 +205,7 @@ class CurlGlobalInit
         }
 };
 
-std::string file_checksum(const std::string &path)
+const std::string file_checksum(const std::string &path)
 {
 #define md_md5
 #ifdef md_md5
