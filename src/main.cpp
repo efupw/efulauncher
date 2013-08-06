@@ -187,6 +187,16 @@ std::string file_checksum(const std::string &path)
     std::array<unsigned char, md_len> result;
     EVP_MD_CTX *mdctx = nullptr;
     std::ifstream is(path, std::ifstream::binary);
+    if (!is.good())
+    {
+        std::cout << "Couldn't open file " << path
+           << " for checksumming." << std::endl;
+        return std::string();
+    }
+    else
+    {
+        //std::cout << "opened file " << path << std::endl;
+    }
 
     const int length = 8192;
     std::array<unsigned char, length> buffer;
@@ -216,7 +226,7 @@ std::string file_checksum(const std::string &path)
             << static_cast<unsigned int>(c);
             });
             */
-    std::cout << calcsum.str() << std::endl;
+    //std::cout << calcsum.str() << std::endl;
     return calcsum.str();
 }
 
