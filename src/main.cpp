@@ -166,6 +166,7 @@ class Target
             {
                 ofs << s;
                 ofs.close();
+                std::cout << "Finished downloading " << name() << std::endl;
             }
             else
             {
