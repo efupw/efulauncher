@@ -8,13 +8,17 @@ ldflags=
 ldlibs=-lcurl
 
 sources=src/main.cpp
-out=bin/efulauncher
+outdir=bin
+outfile=efulauncher
 
 .PHONY: all
 
 all: build
 
-build: $(sources)
-	$(cc) -o $(out) $(include) $(cflags) $(ldflags) $(ldlibs) $(sources)
+test: all
+	cd $(outdir) && ./$(outfile) && cd ..
 
-$(out): $(patsubst %.cpp,%.o,$(sources))
+build: $(sources)
+	$(cc) -o $(outdir)/$(outfile) $(include) $(cflags) $(ldflags) $(ldlibs) $(sources)
+
+$(outfile): $(patsubst %.cpp,%.o,$(sources))
