@@ -296,9 +296,9 @@ int main(int argc, char *argv[])
     if (new_targets.size())
     {
         std::cout << "New targets: " << new_targets.size() << std::endl;
-        //for (auto &t : new_targets)
+        for (auto &t : new_targets)
         {
-            //std::cout << t << std::endl;
+            std::cout << "- " << t << std::endl;
             //t.fetch();
         }
         //std::cout << new_targets[4] << std::endl;
@@ -315,7 +315,7 @@ int main(int argc, char *argv[])
         std::cout << "Outdated targets: " << old_targets.size() << std::endl;
         for (auto &t : old_targets)
         {
-            std::cout << t << std::endl;
+            std::cout << "- " << t << std::endl;
         }
     }
     else
