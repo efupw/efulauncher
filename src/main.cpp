@@ -133,7 +133,21 @@ class Target
         }
         Status status()
         {
-            return Status::Nonexistent;
+            std::ifstream is(name());
+            if (!is.good())
+            {
+                return Status::Nonexistent;
+            }
+            is.close();
+            const std::string calcsum(file_checksum(name()));
+            if (calcsum == checksum())
+            {
+                return Status::Current;
+            }
+            else
+            {
+                return Status::Outdated;
+            }
         }
 
     private:
