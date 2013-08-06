@@ -284,8 +284,7 @@ int main(int argc, char *argv[])
         std::cout << "New targets: " << new_targets.size() << std::endl;
         for (auto &t : new_targets)
         {
-            std::cout << "- " << t << std::endl;
-            t.fetch();
+            std::cout << "- " << t.name() << std::endl;
         }
     }
     else
@@ -298,8 +297,7 @@ int main(int argc, char *argv[])
         std::cout << "Outdated targets: " << old_targets.size() << std::endl;
         for (auto &t : old_targets)
         {
-            std::cout << "- " << t << std::endl;
-            t.fetch();
+            std::cout << "- " << t.name() << std::endl;
         }
     }
     else
@@ -307,6 +305,14 @@ int main(int argc, char *argv[])
         std::cout << "No targets out of date." << std::endl;
     }
 
-    std::cout << std::endl;
+    for (auto &t : new_targets)
+    {
+        t.fetch();
+    }
+    for (auto &t : old_targets)
+    {
+        t.fetch();
+    }
+
     return 0;
 }
