@@ -274,21 +274,15 @@ int main(int argc, char *argv[])
     curl_easy_cleanup(*phandle);
     phandle.reset();
     //std::cout << fetch << std::endl;
-    std::vector<std::string> v(split(fetch, '\n'));
-    //split(fetch, '\n', v);
-    //std::cout << v[1] << std::endl;
+    std::vector<std::string> lines(split(fetch, '\n'));
+    //split(fetch, '\n', lines);
+    //std::cout << lines[1] << std::endl;
     std::vector<Target> new_targets, old_targets;
-    for (auto beg = std::begin(v), end = std::end(v);
+    for (auto beg = std::begin(lines), end = std::end(lines);
             beg != end; ++beg)
     {
-        auto w(split(*beg, '@'));
-        /*
-        for (const auto & sss : w)
-        {
-            std::cout << sss << ", " << std::endl;
-        }
-        */
-        Target t(w[0], w[w.size() - 1]);
+        auto data(split(*beg, '@'));
+        Target t(data[0], data[data.size() - 1]);
         auto status = t.status();
         if (status == Target::Status::Nonexistent)
         {
