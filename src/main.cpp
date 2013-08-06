@@ -88,9 +88,10 @@ class Target
                             if (status == -1)
                             {
                                 std::error_code err(errno, std::generic_category());
-                                if (err == std::errc::file_exists)
+                                if (err != std::errc::file_exists)
                                 {
                                     std::cout << "error making dir: "
+                                        << path << ": "
                                         << err.message() << std::endl;
                                 }
                             }
