@@ -366,6 +366,7 @@ int main(int argc, char *argv[])
         std::cout << "No targets out of date." << std::endl;
     }
 
+#ifndef DEBUG
     for (auto &t : new_targets)
     {
         t.fetch();
@@ -374,6 +375,7 @@ int main(int argc, char *argv[])
     {
         t.fetch();
     }
+#endif
 
     return 0;
 }
