@@ -1,3 +1,4 @@
+#include <limits>
 #include <algorithm>
 #include <array>
 #include <iomanip>
@@ -199,7 +200,6 @@ class CurlGlobalInit
 
 const std::string file_checksum(const std::string &path)
 {
-#define md_md5
 #ifdef md_md5
     auto md = EVP_md5();
     const int md_len = MD5_DIGEST_LENGTH;
@@ -249,11 +249,72 @@ const std::string file_checksum(const std::string &path)
     return calcsum.str();
 }
 
+struct Options
+{
+    bool checksum(const std::string &val)
+    {
+        return val == "checksum";
+    }
+};
+
+bool confirm()
+{
+    char c;
+    do
+    {
+        std::cin >> c;
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        c = tolower(c);
+    } while (c != 'y' && c != 'n');
+    return c == 'y';
+}
+
 int main(int argc, char *argv[])
 {
     CurlGlobalInit curl_global;
+
+    const std::string update_check("https://raw.github.com/commonquail/efulauncher/updatecheck/versioncheck");
     std::string fetch;
     std::shared_ptr<CURL *> phandle = std::make_shared<CURL *>(curl_easy_init());
+    curl_easy_setopt(*phandle, CURLOPT_URL, update_check.c_str());
+    curl_easy_setopt(*phandle, CURLOPT_WRITEFUNCTION, &writefunction);
+    curl_easy_setopt(*phandle, CURLOPT_WRITEDATA, &fetch);
+    //curl_easy_setopt(*phandle, CURLOPT_NOPROGRESS, 0);
+    curl_easy_perform(*phandle);
+    curl_easy_cleanup(*phandle);
+
+    Options opts;
+    std::vector<std::string> lines(split(fetch, '\n'));
+    fetch.clear();
+    for (auto beg = std::begin(lines), end = std::end(lines);
+            beg != end; ++beg)
+    {
+        auto keyvals(split(*beg, '='));
+        if (opts.checksum(keyvals[0]))
+        {
+            const std::string checksum_test(keyvals[keyvals.size() - 1]);
+            if (checksum_test != file_checksum(argv[0]))
+            {
+                std::cout << "A new version of the launcher is available."\
+                    " Would you like to download it (y/n)?" << std::endl;
+                bool download(confirm());
+                if (!download)
+                {
+                    std::cout << "It is strongly recommended to always use the latest launcher."\
+                        " Would you like to download it (y/n)?" << std::endl;
+                    download = confirm();
+                }
+                if (download)
+                {
+                    // Download.
+                    std::cout << "Downloading new launcher..." << std::endl;
+                    std::cout << "Done." << std::endl;
+                }
+            }
+        }
+    }
+
+    phandle = std::make_shared<CURL *>(curl_easy_init());
     curl_easy_setopt(*phandle, CURLOPT_URL, listing.c_str());
     curl_easy_setopt(*phandle, CURLOPT_WRITEFUNCTION, &writefunction);
     curl_easy_setopt(*phandle, CURLOPT_WRITEDATA, &fetch);
@@ -262,7 +323,7 @@ int main(int argc, char *argv[])
     curl_easy_cleanup(*phandle);
     phandle.reset();
 
-    std::vector<std::string> lines(split(fetch, '\n'));
+    lines = split(fetch, '\n');
     std::vector<Target> new_targets, old_targets;
     for (auto beg = std::begin(lines), end = std::end(lines);
             beg != end; ++beg)
