@@ -1,9 +1,7 @@
 cc=g++
 cflags=-Wall -Werror -std=c++11
 
-include=-I/usr/local/include
 include=
-ldflags=-L/usr/local/lib
 ldflags=
 ldlibs=-lcurl
 
@@ -15,6 +13,7 @@ outfile=efulauncher
 
 all: build
 
+test: cflags += -DDEBUG
 test: all
 	cd $(outdir) && ./$(outfile) && cd ..
 
