@@ -249,7 +249,7 @@ const std::string file_checksum(const std::string &path)
     return calcsum.str();
 }
 
-struct Options
+namespace Options
 {
     bool checksum(const std::string &val)
     {
@@ -283,14 +283,13 @@ int main(int argc, char *argv[])
     curl_easy_perform(*phandle);
     curl_easy_cleanup(*phandle);
 
-    Options opts;
     std::vector<std::string> lines(split(fetch, '\n'));
     fetch.clear();
     for (auto beg = std::begin(lines), end = std::end(lines);
             beg != end; ++beg)
     {
         auto keyvals(split(*beg, '='));
-        if (opts.checksum(keyvals[0]))
+        if (Options::checksum(keyvals[0]))
         {
             const std::string checksum_test(keyvals[keyvals.size() - 1]);
             if (checksum_test != file_checksum(argv[0]))
