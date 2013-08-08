@@ -269,10 +269,61 @@ bool confirm()
     return c == 'y';
 }
 
+class EfuLauncher
+{
+    public:
+        explicit EfuLauncher(const std::string path, const std::string update_check):
+            m_path(path), m_update_check(update_check)
+    {}
+        enum class Update
+        {
+            New,
+            ParseError
+        };
+
+        bool has_update()
+        {
+            std::string fetch;
+            std::shared_ptr<CURL *> phandle = std::make_shared<CURL *>(curl_easy_init());
+            curl_easy_setopt(*phandle, CURLOPT_URL, update_check.c_str());
+            curl_easy_setopt(*phandle, CURLOPT_WRITEFUNCTION, &writefunction);
+            curl_easy_setopt(*phandle, CURLOPT_WRITEDATA, &fetch);
+            //curl_easy_setopt(*phandle, CURLOPT_NOPROGRESS, 0);
+            curl_easy_perform(*phandle);
+            curl_easy_cleanup(*phandle);
+
+            std::vector<std::string> lines(split(fetch, '\n'));
+            fetch.clear();
+            bool new_update(false);
+            for (auto beg = std::begin(lines), end = std::end(lines);
+                    beg != end; ++beg)
+            {
+                auto keyvals(split(*beg, '='));
+                if (keyvals.size() != 2)
+                {
+                }
+                if (Options::checksum(keyvals[0]))
+                {
+                    const std::string checksum_test(keyvals[keyvals.size() - 1]);
+                    new_update = checksum_test != file_checksum(path());
+                }
+            }
+            return new_update;
+        }
+        
+    private:
+        const std::string path() const { return m_path; }
+
+        const std::string m_path;
+        const std::string m_update_check;
+};
+
 int main(int argc, char *argv[])
 {
     CurlGlobalInit curl_global;
 
+    EfuLauncher l(argv[0],
+            "https://raw.github.com/commonquail/efulauncher/updatecheck/versioncheck");
     const std::string update_check("https://raw.github.com/commonquail/efulauncher/updatecheck/versioncheck");
     std::string fetch;
     std::shared_ptr<CURL *> phandle = std::make_shared<CURL *>(curl_easy_init());
