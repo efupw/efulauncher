@@ -272,13 +272,8 @@ class EfuLauncher
 {
     public:
         explicit EfuLauncher(const std::string path, const std::string update_check):
-            m_path(path), m_update_check(update_check)
+            m_path(path), m_update_check(update_check), m_has_update(false)
     {}
-        enum class Update
-        {
-            New,
-            ParseError
-        };
 
         bool has_update()
         {
@@ -287,27 +282,28 @@ class EfuLauncher
             curl_easy_setopt(*phandle, CURLOPT_URL, m_update_check.c_str());
             curl_easy_setopt(*phandle, CURLOPT_WRITEFUNCTION, &writefunction);
             curl_easy_setopt(*phandle, CURLOPT_WRITEDATA, &fetch);
-            //curl_easy_setopt(*phandle, CURLOPT_NOPROGRESS, 0);
             curl_easy_perform(*phandle);
             curl_easy_cleanup(*phandle);
 
             std::vector<std::string> lines(split(fetch, '\n'));
             fetch.clear();
-            bool new_update(false);
             for (auto beg = std::begin(lines), end = std::end(lines);
                     beg != end; ++beg)
             {
                 auto keyvals(split(*beg, '='));
                 if (keyvals.size() != 2)
                 {
+                    std::cerr << "Malformed option: " + *beg +
+                        ", aborting launcher update check." << std::endl;
+                    return m_has_update = false;
                 }
                 if (Options::checksum(keyvals[0]))
                 {
-                    const std::string checksum_test(keyvals[keyvals.size() - 1]);
-                    new_update = checksum_test != file_checksum(path());
+                    const std::string checksum_test(keyvals[1]);
+                    m_has_update = checksum_test != file_checksum(path());
                 }
             }
-            return new_update;
+            return m_has_update;
         }
         
     private:
@@ -315,6 +311,7 @@ class EfuLauncher
 
         const std::string m_path;
         const std::string m_update_check;
+        bool m_has_update;
 };
 
 int main(int argc, char *argv[])
