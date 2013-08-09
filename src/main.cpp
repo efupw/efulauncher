@@ -278,7 +278,7 @@ class EfuLauncher
         bool has_update()
         {
             std::string fetch;
-            std::shared_ptr<CURL *> phandle(std::make_shared<CURL*>(curl_easy_init()));
+            auto phandle(std::make_shared<CURL*>(curl_easy_init()));
             curl_easy_setopt(*phandle, CURLOPT_URL, m_update_check.c_str());
             curl_easy_setopt(*phandle, CURLOPT_WRITEFUNCTION, &writefunction);
             curl_easy_setopt(*phandle, CURLOPT_WRITEDATA, &fetch);
