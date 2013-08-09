@@ -254,6 +254,10 @@ namespace Options
     {
         return val == "checksum";
     }
+    bool update_path(const std::string &val)
+    {
+        return val == "update path";
+    }
 };
 
 bool confirm()
@@ -272,11 +276,19 @@ class EfuLauncher
 {
     public:
         explicit EfuLauncher(const std::string path, const std::string update_check):
-            m_path(path), m_update_check(update_check), m_has_update(false)
+            m_path(path),
+            m_update_check(update_check),
+            m_update_path(),
+            m_has_update(false)
     {}
 
         bool has_update()
         {
+            if (m_has_update)
+            {
+                return m_has_update;
+            }
+
             std::string fetch;
             auto phandle(std::make_shared<CURL*>(curl_easy_init()));
             curl_easy_setopt(*phandle, CURLOPT_URL, m_update_check.c_str());
@@ -302,8 +314,22 @@ class EfuLauncher
                     const std::string checksum_test(keyvals[1]);
                     m_has_update = checksum_test != file_checksum(path());
                 }
+                else if (Options::update_path(keyvals[0]))
+                {
+                    m_update_path = keyvals[1];
+                }
+
             }
             return m_has_update;
+        }
+
+        bool get_update()
+        {
+            if (!m_has_update || m_update_path.empty())
+            {
+                return m_has_update = false;
+            }
+            return !(m_has_update = false);
         }
         
     private:
@@ -311,6 +337,7 @@ class EfuLauncher
 
         const std::string m_path;
         const std::string m_update_check;
+        std::string m_update_path;
         bool m_has_update;
 };
 
@@ -343,7 +370,10 @@ int main(int argc, char *argv[])
         {
             // Download.
             std::cout << "Downloading new launcher..." << std::endl;
-            std::cout << "Done." << std::endl;
+            if (l.get_update())
+            {
+                std::cout << "Done." << std::endl;
+            }
         }
     }
 
