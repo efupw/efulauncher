@@ -24,7 +24,6 @@
 
 const std::string listing("http://nwn.efupw.com/rootdir/index.dat");
 const std::string patch_dir("http://nwn.efupw.com/rootdir/patch/");
-const std::string update_check("");
 
 const std::string file_checksum(const std::string &path);
 
@@ -284,8 +283,8 @@ class EfuLauncher
         bool has_update()
         {
             std::string fetch;
-            std::shared_ptr<CURL *> phandle = std::make_shared<CURL *>(curl_easy_init());
-            curl_easy_setopt(*phandle, CURLOPT_URL, update_check.c_str());
+            std::shared_ptr<CURL *> phandle(std::make_shared<CURL*>(curl_easy_init()));
+            curl_easy_setopt(*phandle, CURLOPT_URL, m_update_check.c_str());
             curl_easy_setopt(*phandle, CURLOPT_WRITEFUNCTION, &writefunction);
             curl_easy_setopt(*phandle, CURLOPT_WRITEDATA, &fetch);
             //curl_easy_setopt(*phandle, CURLOPT_NOPROGRESS, 0);
