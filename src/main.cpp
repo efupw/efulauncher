@@ -321,12 +321,6 @@ int main(int argc, char *argv[])
     EfuLauncher l(argv[0],
             "https://raw.github.com/commonquail/efulauncher/"\
             "updatecheck/versioncheck");
-    std::string fetch;
-    auto phandle(std::make_shared<CURL *>(curl_easy_init()));
-    curl_easy_cleanup(*phandle);
-
-    std::vector<std::string> lines(split(fetch, '\n'));
-    fetch.clear();
     if (l.has_update())
     {
         std::cout << "A new version of the launcher is available."\
@@ -347,7 +341,8 @@ int main(int argc, char *argv[])
         }
     }
 
-    phandle = std::make_shared<CURL *>(curl_easy_init());
+    std::string fetch;
+    auto phandle(std::make_shared<CURL *>(curl_easy_init()));
     curl_easy_setopt(*phandle, CURLOPT_URL, listing.c_str());
     curl_easy_setopt(*phandle, CURLOPT_WRITEFUNCTION, &writefunction);
     curl_easy_setopt(*phandle, CURLOPT_WRITEDATA, &fetch);
@@ -355,7 +350,7 @@ int main(int argc, char *argv[])
     curl_easy_cleanup(*phandle);
     phandle.reset();
 
-    lines = split(fetch, '\n');
+    auto lines(split(fetch, '\n'));
     std::vector<Target> new_targets, old_targets;
     for (auto beg = std::begin(lines), end = std::end(lines);
             beg != end; ++beg)
