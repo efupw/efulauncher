@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include <limits>
 #include <algorithm>
 #include <array>
@@ -33,6 +34,83 @@ size_t writefunction(const char *ptr, size_t size, size_t nmemb, void *userdata)
     s->append(ptr, size * nmemb);
     return size * nmemb;
 }
+
+class CurlEasy
+{
+    public:
+        class Builder
+        {
+            private:
+                std::string m_url;
+                std::string m_dest;
+                std::shared_ptr<CURL *> m_pcurl;
+
+            public:
+                Builder(const std::string &url):
+                    m_url(url),
+                    m_dest(),
+                    m_pcurl(std::make_shared<CURL *>(curl_easy_init()))
+            {}
+                ~Builder()
+                {
+                    curl_easy_cleanup(*m_pcurl);
+                }
+
+                Builder& with_writeto(const std::string &dest)
+                {
+                    m_dest = dest;
+                    return *this;
+                }
+
+                CurlEasy build()
+                {
+                    auto curl(CurlEasy(*this));
+                    curl.validate();
+                    curl_easy_setopt(*m_pcurl, CURLOPT_URL, m_url.c_str());
+                    if (!m_dest.empty())
+                    {
+                        curl_easy_setopt(*m_pcurl, CURLOPT_WRITEFUNCTION, &writefunction);
+                        curl_easy_setopt(*m_pcurl, CURLOPT_WRITEDATA, &m_dest);
+                    }
+                    return curl;
+                }
+
+                void validate() const
+                {
+                    if (*m_pcurl == nullptr)
+                    {
+                        throw std::runtime_error("curl handle points to nullptr.");
+                    }
+                    if (m_url.empty())
+                    {
+                        throw std::runtime_error("Empty URL.");
+                    }
+                }
+
+                bool perform() const
+                {
+                    return CURLE_OK == curl_easy_perform(*m_pcurl);
+                }
+        };
+
+        bool perform() const
+        {
+            return m_props.perform();
+        }
+
+        ~CurlEasy() {}
+
+    private:
+        const CurlEasy::Builder m_props;
+
+        CurlEasy(const CurlEasy::Builder &props):
+            m_props(props)
+    {}
+        void validate() const
+        {
+            m_props.validate();
+        }
+};
 
 std::vector<std::string> &split(const std::string &s, char delim,
         std::vector<std::string> &elems)
@@ -151,9 +229,13 @@ class Target
         void do_fetch()
         {
             std::string s;
+            std::string url(patch_dir + name());
+            CurlEasy curl(CurlEasy::Builder(url)
+                .with_writeto(s)
+                .build());
+            /*
             std::shared_ptr<CURL *> phandle =
                 std::make_shared<CURL *>(curl_easy_init());
-            std::string url(patch_dir + name());
             curl_easy_setopt(*phandle, CURLOPT_URL, url.c_str());
             curl_easy_setopt(*phandle, CURLOPT_WRITEFUNCTION, &writefunction);
             curl_easy_setopt(*phandle, CURLOPT_WRITEDATA, &s);
@@ -161,6 +243,7 @@ class Target
             curl_easy_perform(*phandle);
             curl_easy_cleanup(*phandle);
             phandle.reset();
+            */
             std::ofstream ofs(name());
             if (ofs.good())
             {
@@ -342,6 +425,12 @@ int main(int argc, char *argv[])
     }
 
     std::string fetch;
+            CurlEasy curl(CurlEasy::Builder(listing)
+                .with_writeto(fetch)
+                .build());
+            curl.perform();
+            
+            /*
     auto phandle(std::make_shared<CURL *>(curl_easy_init()));
     curl_easy_setopt(*phandle, CURLOPT_URL, listing.c_str());
     curl_easy_setopt(*phandle, CURLOPT_WRITEFUNCTION, &writefunction);
@@ -349,6 +438,7 @@ int main(int argc, char *argv[])
     curl_easy_perform(*phandle);
     curl_easy_cleanup(*phandle);
     phandle.reset();
+    */
 
     auto lines(split(fetch, '\n'));
     std::vector<Target> new_targets, old_targets;
