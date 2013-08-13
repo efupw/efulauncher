@@ -79,10 +79,19 @@ class CurlEasy
 
         void perform()
         {
+            if (m_used)
+            {
+                throw CurlEasyException("Cannot reuse curl handles.");
+            }
+
             CURLcode c = curl_easy_perform(*m_pcurl);
             if (c != CURLE_OK)
             {
                 throw CurlEasyException(c);
+            }
+            else
+            {
+                m_used = true;
             }
         }
 
@@ -107,6 +116,7 @@ class CurlEasy
 
     private:
         std::shared_ptr<CURL *> m_pcurl;
+        bool m_used;
 };
 
 std::vector<std::string> &split(const std::string &s, char delim,
