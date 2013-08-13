@@ -22,7 +22,7 @@
 #include <fcntl.h>
 #include <string.h>
 
-#include "./curleasy.h"
+#include "curleasy.h"
 
 const std::string listing("http://nwn.efupw.com/rootdir/index.dat");
 const std::string patch_dir("http://nwn.efupw.com/rootdir/patch/");
