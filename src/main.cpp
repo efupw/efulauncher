@@ -35,81 +35,77 @@ size_t writefunction(const char *ptr, size_t size, size_t nmemb, void *userdata)
     return size * nmemb;
 }
 
+class CurlEasyException : public std::runtime_error
+{
+    public:
+        CurlEasyException(const std::string &msg):
+            std::runtime_error(msg) {}
+
+        CurlEasyException(CURLcode c):
+            std::runtime_error(curl_easy_strerror(c)) {}
+};
+
 class CurlEasy
 {
     public:
-        class Builder
+        CurlEasy(const std::string &url):
+            m_pcurl(std::make_shared<CURL *>(curl_easy_init()))
         {
-            private:
-                std::string m_url;
-                std::string m_dest;
-                std::shared_ptr<CURL *> m_pcurl;
+            if (!*m_pcurl)
+            {
+                throw CurlEasyException("curl handle not properly initialized.");
+            }
 
-            public:
-                Builder(const std::string &url):
-                    m_url(url),
-                    m_dest(),
-                    m_pcurl(std::make_shared<CURL *>(curl_easy_init()))
-            {}
-                ~Builder()
-                {
-                    curl_easy_cleanup(*m_pcurl);
-                }
+            if (url.empty())
+            {
+                throw CurlEasyException("Empty URL.");
+            }
 
-                Builder& with_writeto(const std::string &dest)
-                {
-                    m_dest = dest;
-                    return *this;
-                }
-
-                CurlEasy build()
-                {
-                    auto curl(CurlEasy(*this));
-                    curl.validate();
-                    curl_easy_setopt(*m_pcurl, CURLOPT_URL, m_url.c_str());
-                    if (!m_dest.empty())
-                    {
-                        curl_easy_setopt(*m_pcurl, CURLOPT_WRITEFUNCTION, &writefunction);
-                        curl_easy_setopt(*m_pcurl, CURLOPT_WRITEDATA, &m_dest);
-                    }
-                    return curl;
-                }
-
-                void validate() const
-                {
-                    if (*m_pcurl == nullptr)
-                    {
-                        throw std::runtime_error("curl handle points to nullptr.");
-                    }
-                    if (m_url.empty())
-                    {
-                        throw std::runtime_error("Empty URL.");
-                    }
-                }
-
-                bool perform() const
-                {
-                    return CURLE_OK == curl_easy_perform(*m_pcurl);
-                }
-        };
-
-        bool perform() const
-        {
-            return m_props.perform();
+            CURLcode c = curl_easy_setopt(*m_pcurl, CURLOPT_URL, url.c_str());
+            if (c != CURLE_OK)
+            {
+                throw CurlEasyException(c);
+            }
         }
 
-        ~CurlEasy() {}
+        ~CurlEasy()
+        {
+            if (*m_pcurl)
+            {
+                curl_easy_cleanup(*m_pcurl);
+            }
+        }
+
+        void perform()
+        {
+            CURLcode c = curl_easy_perform(*m_pcurl);
+            if (c != CURLE_OK)
+            {
+                throw CurlEasyException(c);
+            }
+        }
+
+        void write_to(const std::string &dest)
+        {
+            CURLcode c = curl_easy_setopt(*m_pcurl,
+                    CURLOPT_WRITEFUNCTION, &writefunction);
+
+            if (c != CURLE_OK)
+            {
+                throw CurlEasyException(c);
+            }
+
+            c = curl_easy_setopt(*m_pcurl,
+                    CURLOPT_WRITEDATA, &dest);
+
+            if (c != CURLE_OK)
+            {
+                throw CurlEasyException(c);
+            }
+        }
 
     private:
-        const CurlEasy::Builder m_props;
-
-        CurlEasy(const CurlEasy::Builder &props):
-            m_props(props)
-    {}
-        void validate() const
-        {
-            m_props.validate();
-        }
+        std::shared_ptr<CURL *> m_pcurl;
 };
 
 std::vector<std::string> &split(const std::string &s, char delim,
