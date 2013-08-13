@@ -418,7 +418,8 @@ int main(int argc, char *argv[])
         {
             // Download.
             std::cout << "Downloading new launcher..." << std::endl;
-            std::cout << "Done." << std::endl;
+            std::cout << "Done. Please extract and run the new launcher." << std::endl;
+            return 0;
         }
     }
 
