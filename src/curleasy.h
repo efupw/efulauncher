@@ -10,6 +10,20 @@ size_t writefunction(const char *ptr, size_t size, size_t nmemb, void *userdata)
     return size * nmemb;
 }
 
+class CurlGlobalInit
+{
+    public:
+        explicit CurlGlobalInit()
+        {
+            curl_global_init(CURL_GLOBAL_ALL);
+        }
+
+        ~CurlGlobalInit()
+        {
+            curl_global_cleanup();
+        }
+};
+
 class CurlEasyException : public std::runtime_error
 {
     public:

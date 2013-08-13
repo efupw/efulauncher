@@ -173,20 +173,6 @@ std::ostream& operator<<(std::ostream &os, const Target &t)
     return os << "name: " << t.name() << ", checksum: " << t.checksum();
 }
 
-class CurlGlobalInit
-{
-    public:
-        CurlGlobalInit()
-        {
-            curl_global_init(CURL_GLOBAL_ALL);
-        }
-
-        ~CurlGlobalInit()
-        {
-            curl_global_cleanup();
-        }
-};
-
 const std::string file_checksum(const std::string &path)
 {
 #define md_md5
