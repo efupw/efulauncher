@@ -226,21 +226,11 @@ class Target
         {
             std::string s;
             std::string url(patch_dir + name());
-            CurlEasy curl(CurlEasy::Builder(url)
-                .with_writeto(s)
-                .build());
-            /*
-            std::shared_ptr<CURL *> phandle =
-                std::make_shared<CURL *>(curl_easy_init());
-            curl_easy_setopt(*phandle, CURLOPT_URL, url.c_str());
-            curl_easy_setopt(*phandle, CURLOPT_WRITEFUNCTION, &writefunction);
-            curl_easy_setopt(*phandle, CURLOPT_WRITEDATA, &s);
-            //curl_easy_setopt(*phandle, CURLOPT_NOPROGRESS, 0);
-            curl_easy_perform(*phandle);
-            curl_easy_cleanup(*phandle);
-            phandle.reset();
-            */
+            CurlEasy curl(url);
+            curl.write_to(s);
+            curl.perform();
             std::ofstream ofs(name());
+
             if (ofs.good())
             {
                 ofs << s;
@@ -357,12 +347,9 @@ class EfuLauncher
         bool has_update()
         {
             std::string fetch;
-            auto phandle(std::make_shared<CURL*>(curl_easy_init()));
-            curl_easy_setopt(*phandle, CURLOPT_URL, m_update_check.c_str());
-            curl_easy_setopt(*phandle, CURLOPT_WRITEFUNCTION, &writefunction);
-            curl_easy_setopt(*phandle, CURLOPT_WRITEDATA, &fetch);
-            curl_easy_perform(*phandle);
-            curl_easy_cleanup(*phandle);
+            CurlEasy curl(m_update_check.c_str());
+            curl.write_to(fetch);
+            curl.perform();
 
             std::vector<std::string> lines(split(fetch, '\n'));
             fetch.clear();
@@ -421,20 +408,9 @@ int main(int argc, char *argv[])
     }
 
     std::string fetch;
-            CurlEasy curl(CurlEasy::Builder(listing)
-                .with_writeto(fetch)
-                .build());
-            curl.perform();
-            
-            /*
-    auto phandle(std::make_shared<CURL *>(curl_easy_init()));
-    curl_easy_setopt(*phandle, CURLOPT_URL, listing.c_str());
-    curl_easy_setopt(*phandle, CURLOPT_WRITEFUNCTION, &writefunction);
-    curl_easy_setopt(*phandle, CURLOPT_WRITEDATA, &fetch);
-    curl_easy_perform(*phandle);
-    curl_easy_cleanup(*phandle);
-    phandle.reset();
-    */
+    CurlEasy curl(listing);
+    curl.write_to(fetch);
+    curl.perform();
 
     auto lines(split(fetch, '\n'));
     std::vector<Target> new_targets, old_targets;
