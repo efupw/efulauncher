@@ -1,7 +1,7 @@
 cc=g++
 cflags=-Wall -Werror -std=c++11
 
-include=-I./
+include=
 ldflags=
 ldlibs=-lcurl
 
