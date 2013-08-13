@@ -386,6 +386,68 @@ class EfuLauncher
             }
             return m_has_update;
         }
+
+        void stat_targets()
+        {
+            std::string fetch;
+            CurlEasy curl(listing);
+            curl.write_to(fetch);
+            curl.perform();
+
+            auto lines(split(fetch, '\n'));
+            std::vector<Target> new_targets, old_targets;
+            for (auto beg = std::begin(lines), end = std::end(lines);
+                    beg != end; ++beg)
+            {
+                auto data(split(*beg, '@'));
+                Target t(data[0], data[data.size() - 1]);
+                auto status = t.status();
+                if (status == Target::Status::Nonexistent)
+                {
+                    new_targets.push_back(std::move(t));
+                }
+                else if (status == Target::Status::Outdated)
+                {
+                    old_targets.push_back(std::move(t));
+                }
+            }
+            if (new_targets.size())
+            {
+                std::cout << "New targets: " << new_targets.size() << std::endl;
+                for (auto &t : new_targets)
+                {
+                    std::cout << "- " << t.name() << std::endl;
+                }
+            }
+            else
+            {
+                std::cout << "No new targets." << std::endl;
+            }
+
+            if (old_targets.size())
+            {
+                std::cout << "Outdated targets: " << old_targets.size() << std::endl;
+                for (auto &t : old_targets)
+                {
+                    std::cout << "- " << t.name() << std::endl;
+                }
+            }
+            else
+            {
+                std::cout << "No targets out of date." << std::endl;
+            }
+
+#ifndef DEBUG
+            for (auto &t : new_targets)
+            {
+                t.fetch();
+            }
+            for (auto &t : old_targets)
+            {
+                t.fetch();
+            }
+#endif
+        }
         
     private:
         const std::string path() const { return m_path; }
@@ -423,64 +485,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    std::string fetch;
-    CurlEasy curl(listing);
-    curl.write_to(fetch);
-    curl.perform();
-
-    auto lines(split(fetch, '\n'));
-    std::vector<Target> new_targets, old_targets;
-    for (auto beg = std::begin(lines), end = std::end(lines);
-            beg != end; ++beg)
-    {
-        auto data(split(*beg, '@'));
-        Target t(data[0], data[data.size() - 1]);
-        auto status = t.status();
-        if (status == Target::Status::Nonexistent)
-        {
-            new_targets.push_back(std::move(t));
-        }
-        else if (status == Target::Status::Outdated)
-        {
-            old_targets.push_back(std::move(t));
-        }
-    }
-    if (new_targets.size())
-    {
-        std::cout << "New targets: " << new_targets.size() << std::endl;
-        for (auto &t : new_targets)
-        {
-            std::cout << "- " << t.name() << std::endl;
-        }
-    }
-    else
-    {
-        std::cout << "No new targets." << std::endl;
-    }
-
-    if (old_targets.size())
-    {
-        std::cout << "Outdated targets: " << old_targets.size() << std::endl;
-        for (auto &t : old_targets)
-        {
-            std::cout << "- " << t.name() << std::endl;
-        }
-    }
-    else
-    {
-        std::cout << "No targets out of date." << std::endl;
-    }
-
-#ifndef DEBUG
-    for (auto &t : new_targets)
-    {
-        t.fetch();
-    }
-    for (auto &t : old_targets)
-    {
-        t.fetch();
-    }
-#endif
+    l.stat_targets();
 
     return 0;
 }
