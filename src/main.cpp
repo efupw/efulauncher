@@ -199,6 +199,7 @@ class CurlGlobalInit
 
 const std::string file_checksum(const std::string &path)
 {
+#define md_md5
 #ifdef md_md5
     auto md = EVP_md5();
     const int md_len = MD5_DIGEST_LENGTH;
