@@ -38,18 +38,19 @@ size_t writefunction(const char *ptr, size_t size, size_t nmemb, void *userdata)
 class CurlEasyException : public std::runtime_error
 {
     public:
-        CurlEasyException(const std::string &msg):
+        explicit CurlEasyException(const std::string &msg):
             std::runtime_error(msg) {}
 
-        CurlEasyException(CURLcode c):
+        explicit CurlEasyException(CURLcode c):
             std::runtime_error(curl_easy_strerror(c)) {}
 };
 
 class CurlEasy
 {
     public:
-        CurlEasy(const std::string &url):
-            m_pcurl(std::make_shared<CURL *>(curl_easy_init()))
+        explicit CurlEasy(const std::string &url):
+            m_pcurl(std::make_shared<CURL *>(curl_easy_init())),
+            m_used(false)
         {
             if (!*m_pcurl)
             {
