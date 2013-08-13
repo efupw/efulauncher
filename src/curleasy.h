@@ -1,27 +1,16 @@
+#ifndef EFU_CURLEASY_H
+#define EFU_CURLEASY_H
+
 #include <string>
 #include <memory>
 #include <stdexcept>
 #include <curl/curl.h>
 
-size_t writefunction(const char *ptr, size_t size, size_t nmemb, void *userdata)
-{
-    std::string *s = static_cast<std::string *>(userdata);
-    s->append(ptr, size * nmemb);
-    return size * nmemb;
-}
-
 class CurlGlobalInit
 {
     public:
-        explicit CurlGlobalInit()
-        {
-            curl_global_init(CURL_GLOBAL_ALL);
-        }
-
-        ~CurlGlobalInit()
-        {
-            curl_global_cleanup();
-        }
+        explicit CurlGlobalInit();
+        ~CurlGlobalInit();
 };
 
 class CurlEasyException : public std::runtime_error
@@ -37,74 +26,15 @@ class CurlEasyException : public std::runtime_error
 class CurlEasy
 {
     public:
-        explicit CurlEasy(const std::string &url):
-            m_pcurl(std::make_shared<CURL *>(curl_easy_init())),
-            m_used(false)
-        {
-            if (!*m_pcurl)
-            {
-                throw CurlEasyException("curl handle not properly initialized.");
-            }
+        explicit CurlEasy(const std::string &url);
 
-            if (url.empty())
-            {
-                throw CurlEasyException("Empty URL.");
-            }
+        ~CurlEasy();
 
-            CURLcode c = curl_easy_setopt(*m_pcurl, CURLOPT_URL, url.c_str());
-            if (c != CURLE_OK)
-            {
-                throw CurlEasyException(c);
-            }
-        }
-
-        ~CurlEasy()
-        {
-            if (*m_pcurl)
-            {
-                curl_easy_cleanup(*m_pcurl);
-            }
-        }
-
-        void perform()
-        {
-            if (m_used)
-            {
-                throw CurlEasyException("Cannot reuse curl handles.");
-            }
-
-            CURLcode c = curl_easy_perform(*m_pcurl);
-            if (c != CURLE_OK)
-            {
-                throw CurlEasyException(c);
-            }
-            else
-            {
-                m_used = true;
-            }
-        }
-
-        void write_to(const std::string &dest)
-        {
-            CURLcode c = curl_easy_setopt(*m_pcurl,
-                    CURLOPT_WRITEFUNCTION, &writefunction);
-
-            if (c != CURLE_OK)
-            {
-                throw CurlEasyException(c);
-            }
-
-            c = curl_easy_setopt(*m_pcurl,
-                    CURLOPT_WRITEDATA, &dest);
-
-            if (c != CURLE_OK)
-            {
-                throw CurlEasyException(c);
-            }
-        }
+        void perform();
+        void write_to(const std::string &dest);
 
     private:
         std::shared_ptr<CURL *> m_pcurl;
         bool m_used;
 };
-
+#endif //EFU_CURLEASY_H
