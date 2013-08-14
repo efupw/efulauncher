@@ -147,15 +147,15 @@ class Target
     private:
         void do_fetch()
         {
-            std::string s;
-            std::string url(patch_dir + name());
-            CurlEasy curl(url);
-            curl.write_to(s);
-            curl.perform();
             std::ofstream ofs(name());
-
             if (ofs.good())
             {
+                std::string s;
+                std::string url(patch_dir + name());
+                CurlEasy curl(url);
+                curl.write_to(s);
+                curl.perform();
+
                 ofs << s;
                 ofs.close();
                 std::cout << "Finished downloading " << name() << std::endl;
