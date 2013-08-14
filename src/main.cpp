@@ -48,6 +48,31 @@ std::vector<std::string> split(const std::string &s, char delim)
     return split(s, delim, elems);
 }
 
+void make_dir(const std::string &path)
+{
+    auto elems = split(path, '/');
+    std::string descend;
+    for (size_t i = 0, k = elems.size() - 1; i < k; ++i)
+    {
+        const std::string &s(elems[i]);
+        if (s.size() && s != ".")
+        {
+            descend.append((i > 0 ? "/" : "") + s);
+            auto status = mkdir(descend.c_str(), S_IRWXU);
+            if (status == -1)
+            {
+                std::error_code err(errno, std::generic_category());
+                if (err != std::errc::file_exists)
+                {
+                    std::cout << "error making dir: "
+                        << descend << ": "
+                        << err.message() << std::endl;
+                }
+            }
+        }
+    }
+}
+
 class Target
 {
     public:
@@ -67,41 +92,17 @@ class Target
         void fetch()
         {
             std::cout << "Statting target " << name() << "...";
-            std::string path;
             std::fstream fs(name(), std::ios_base::in);
             if (!fs.good())
             {
                 fs.close();
                 std::cout << " doesn't exist, creating new." << std::endl;
-                auto elems = split(name(), '/');
-                for (size_t i = 0, k = elems.size(); i < k; ++i)
-                {
-                    const std::string &s(elems[i]);
-                    if (s.size() && s != ".")
-                    {
-                        path.append((i > 0 ? "/" : "") + s);
-                        // i indicates a directory.
-                        if (i < k - 1)
-                        {
-                            auto status = mkdir(path.c_str(), S_IRWXU);
-                            if (status == -1)
-                            {
-                                std::error_code err(errno, std::generic_category());
-                                if (err != std::errc::file_exists)
-                                {
-                                    std::cout << "error making dir: "
-                                        << path << ": "
-                                        << err.message() << std::endl;
-                                }
-                            }
-                        }
-                    }
-                }
-                fs.open(path, std::ios_base::out);
+                make_dir(name());
+                fs.open(name(), std::ios_base::out);
                 if (!fs.good())
                 {
                     fs.close();
-                    std::cout << "Failed to create file: " << path << std::endl;
+                    std::cout << "Failed to create file: " << name() << std::endl;
                 }
                 else
                 {
