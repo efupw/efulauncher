@@ -383,7 +383,7 @@ int main(int argc, char *argv[])
 
     EfuLauncher l(argv[0],
             "https://raw.github.com/commonquail/efulauncher/"\
-            "updatecheck/versioncheck");
+            "master/versioncheck");
     if (l.has_update())
     {
         std::cout << "A new version of the launcher is available."\
