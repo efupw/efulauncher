@@ -1,9 +1,9 @@
+#include <stdexcept>
 #include <limits>
 #include <algorithm>
 #include <array>
-#include <iomanip>
-#include <curl/curl.h>
 #include <memory>
+#include <iomanip>
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -22,17 +22,12 @@
 #include <fcntl.h>
 #include <string.h>
 
+#include "curleasy.h"
+
 const std::string listing("http://nwn.efupw.com/rootdir/index.dat");
 const std::string patch_dir("http://nwn.efupw.com/rootdir/patch/");
 
 const std::string file_checksum(const std::string &path);
-
-size_t writefunction(const char *ptr, size_t size, size_t nmemb, void *userdata)
-{
-    std::string *s = static_cast<std::string *>(userdata);
-    s->append(ptr, size * nmemb);
-    return size * nmemb;
-}
 
 std::vector<std::string> &split(const std::string &s, char delim,
         std::vector<std::string> &elems)
@@ -151,17 +146,12 @@ class Target
         void do_fetch()
         {
             std::string s;
-            std::shared_ptr<CURL *> phandle =
-                std::make_shared<CURL *>(curl_easy_init());
             std::string url(patch_dir + name());
-            curl_easy_setopt(*phandle, CURLOPT_URL, url.c_str());
-            curl_easy_setopt(*phandle, CURLOPT_WRITEFUNCTION, &writefunction);
-            curl_easy_setopt(*phandle, CURLOPT_WRITEDATA, &s);
-            //curl_easy_setopt(*phandle, CURLOPT_NOPROGRESS, 0);
-            curl_easy_perform(*phandle);
-            curl_easy_cleanup(*phandle);
-            phandle.reset();
+            CurlEasy curl(url);
+            curl.write_to(s);
+            curl.perform();
             std::ofstream ofs(name());
+
             if (ofs.good())
             {
                 ofs << s;
@@ -182,20 +172,6 @@ std::ostream& operator<<(std::ostream &os, const Target &t)
 {
     return os << "name: " << t.name() << ", checksum: " << t.checksum();
 }
-
-class CurlGlobalInit
-{
-    public:
-        CurlGlobalInit()
-        {
-            curl_global_init(CURL_GLOBAL_ALL);
-        }
-
-        ~CurlGlobalInit()
-        {
-            curl_global_cleanup();
-        }
-};
 
 const std::string file_checksum(const std::string &path)
 {
@@ -275,10 +251,10 @@ bool confirm()
 class EfuLauncher
 {
     public:
-        explicit EfuLauncher(const std::string path, const std::string update_check):
+        explicit EfuLauncher(const std::string path,
+                const std::string update_check):
             m_path(path),
             m_update_check(update_check),
-            m_update_path(),
             m_has_update(false)
     {}
 
@@ -290,12 +266,9 @@ class EfuLauncher
             }
 
             std::string fetch;
-            auto phandle(std::make_shared<CURL*>(curl_easy_init()));
-            curl_easy_setopt(*phandle, CURLOPT_URL, m_update_check.c_str());
-            curl_easy_setopt(*phandle, CURLOPT_WRITEFUNCTION, &writefunction);
-            curl_easy_setopt(*phandle, CURLOPT_WRITEDATA, &fetch);
-            curl_easy_perform(*phandle);
-            curl_easy_cleanup(*phandle);
+            CurlEasy curl(m_update_check.c_str());
+            curl.write_to(fetch);
+            curl.perform();
 
             std::vector<std::string> lines(split(fetch, '\n'));
             fetch.clear();
@@ -331,6 +304,68 @@ class EfuLauncher
             }
             return !(m_has_update = false);
         }
+
+        void stat_targets()
+        {
+            std::string fetch;
+            CurlEasy curl(listing);
+            curl.write_to(fetch);
+            curl.perform();
+
+            auto lines(split(fetch, '\n'));
+            std::vector<Target> new_targets, old_targets;
+            for (auto beg = std::begin(lines), end = std::end(lines);
+                    beg != end; ++beg)
+            {
+                auto data(split(*beg, '@'));
+                Target t(data[0], data[data.size() - 1]);
+                auto status = t.status();
+                if (status == Target::Status::Nonexistent)
+                {
+                    new_targets.push_back(std::move(t));
+                }
+                else if (status == Target::Status::Outdated)
+                {
+                    old_targets.push_back(std::move(t));
+                }
+            }
+            if (new_targets.size())
+            {
+                std::cout << "New targets: " << new_targets.size() << std::endl;
+                for (auto &t : new_targets)
+                {
+                    std::cout << "- " << t.name() << std::endl;
+                }
+            }
+            else
+            {
+                std::cout << "No new targets." << std::endl;
+            }
+
+            if (old_targets.size())
+            {
+                std::cout << "Outdated targets: " << old_targets.size() << std::endl;
+                for (auto &t : old_targets)
+                {
+                    std::cout << "- " << t.name() << std::endl;
+                }
+            }
+            else
+            {
+                std::cout << "No targets out of date." << std::endl;
+            }
+
+#ifndef DEBUG
+            for (auto &t : new_targets)
+            {
+                t.fetch();
+            }
+            for (auto &t : old_targets)
+            {
+                t.fetch();
+            }
+#endif
+        }
         
     private:
         const std::string path() const { return m_path; }
@@ -348,12 +383,6 @@ int main(int argc, char *argv[])
     EfuLauncher l(argv[0],
             "https://raw.github.com/commonquail/efulauncher/"\
             "updatecheck/versioncheck");
-    std::string fetch;
-    auto phandle(std::make_shared<CURL *>(curl_easy_init()));
-    curl_easy_cleanup(*phandle);
-
-    std::vector<std::string> lines(split(fetch, '\n'));
-    fetch.clear();
     if (l.has_update())
     {
         std::cout << "A new version of the launcher is available."\
@@ -372,72 +401,13 @@ int main(int argc, char *argv[])
             std::cout << "Downloading new launcher..." << std::endl;
             if (l.get_update())
             {
-                std::cout << "Done." << std::endl;
+                std::cout << "Done. Please extract and run the new launcher." << std::endl;
             }
+            return 0;
         }
     }
 
-    phandle = std::make_shared<CURL *>(curl_easy_init());
-    curl_easy_setopt(*phandle, CURLOPT_URL, listing.c_str());
-    curl_easy_setopt(*phandle, CURLOPT_WRITEFUNCTION, &writefunction);
-    curl_easy_setopt(*phandle, CURLOPT_WRITEDATA, &fetch);
-    curl_easy_perform(*phandle);
-    curl_easy_cleanup(*phandle);
-    phandle.reset();
-
-    lines = split(fetch, '\n');
-    std::vector<Target> new_targets, old_targets;
-    for (auto beg = std::begin(lines), end = std::end(lines);
-            beg != end; ++beg)
-    {
-        auto data(split(*beg, '@'));
-        Target t(data[0], data[data.size() - 1]);
-        auto status = t.status();
-        if (status == Target::Status::Nonexistent)
-        {
-            new_targets.push_back(std::move(t));
-        }
-        else if (status == Target::Status::Outdated)
-        {
-            old_targets.push_back(std::move(t));
-        }
-    }
-    if (new_targets.size())
-    {
-        std::cout << "New targets: " << new_targets.size() << std::endl;
-        for (auto &t : new_targets)
-        {
-            std::cout << "- " << t.name() << std::endl;
-        }
-    }
-    else
-    {
-        std::cout << "No new targets." << std::endl;
-    }
-
-    if (old_targets.size())
-    {
-        std::cout << "Outdated targets: " << old_targets.size() << std::endl;
-        for (auto &t : old_targets)
-        {
-            std::cout << "- " << t.name() << std::endl;
-        }
-    }
-    else
-    {
-        std::cout << "No targets out of date." << std::endl;
-    }
-
-#ifndef DEBUG
-    for (auto &t : new_targets)
-    {
-        t.fetch();
-    }
-    for (auto &t : old_targets)
-    {
-        t.fetch();
-    }
-#endif
+    l.stat_targets();
 
     return 0;
 }

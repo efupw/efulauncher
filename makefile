@@ -1,23 +1,30 @@
-cc=g++
-cflags=-Wall -Werror -std=c++11
+CXX=g++
+CXXFLAGS_DEBUG=-Wall -Werror -std=c++11 -Dmd_md5 -DDEBUG
+CXXFLAGS_RELEASE=-Wall -Werror -std=c++11 -Dmd_md5 -O3
+CXXFLAGS=$(CXXFLAGS_DEBUG)
+LDLIBS=-lcurl
 
-include=
-ldflags=
-ldlibs=-lcurl
+SRCS=src/main.cpp src/curleasy.cpp
+OBJS=$(subst .cpp,.o,$(SRCS))
 
-sources=src/main.cpp
-outdir=bin
-outfile=efulauncher
+OUTDIR=bin
+TARGET=efulauncher
+
+RM=rm -f
 
 .PHONY: all
+all: $(TARGET)
 
-all: build
+$(TARGET): $(OBJS)
+	$(CXX) $(LDFLAGS) -o $(OUTDIR)/$(TARGET) $(CXXFLAGS) $(OBJS) $(LDLIBS)
 
-test: cflags += -DDEBUG
-test: all
-	cd $(outdir) && ./$(outfile) && cd ..
+.PHONY: run
+run: all
+	cd $(OUTDIR) && ./$(TARGET) && cd ..
 
-build: $(sources)
-	$(cc) -o $(outdir)/$(outfile) $(include) $(cflags) $(ldflags) $(ldlibs) $(sources)
+.PHONY: release
+release: CXXFLAGS=$(CXXFLAGS_RELEASE)
+release: all
 
-$(outfile): $(patsubst %.cpp,%.o,$(sources))
+clean:
+	$(RM) $(OBJS) $(OUTDIR)/$(TARGET)
