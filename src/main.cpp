@@ -24,6 +24,7 @@
 
 #include "curleasy.h"
 
+const std::string version("0.1.0");
 const std::string listing("http://nwn.efupw.com/rootdir/index.dat");
 const std::string patch_dir("http://nwn.efupw.com/rootdir/patch/");
 
@@ -226,9 +227,9 @@ const std::string file_checksum(const std::string &path)
 
 namespace Options
 {
-    bool checksum(const std::string &val)
+    bool version(const std::string &val)
     {
-        return val == "checksum";
+        return val == "version";
     }
     bool update_path(const std::string &val)
     {
@@ -282,10 +283,10 @@ class EfuLauncher
                         ", aborting launcher update check." << std::endl;
                     return m_has_update = false;
                 }
-                if (Options::checksum(keyvals[0]))
+                if (Options::version(keyvals[0]))
                 {
-                    const std::string checksum_test(keyvals[1]);
-                    m_has_update = checksum_test != file_checksum(path());
+                    const std::string version_test(keyvals[1]);
+                    m_has_update = version_test != version;
                 }
                 else if (Options::update_path(keyvals[0]))
                 {
