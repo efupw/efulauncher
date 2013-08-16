@@ -33,6 +33,8 @@ class CurlEasy
         void perform();
         void write_to(const std::string &dest);
 
+        void progressbar(bool val);
+
     private:
         std::shared_ptr<CURL *> m_pcurl;
         bool m_used;
