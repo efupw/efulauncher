@@ -133,6 +133,7 @@ class Target
                 return Status::Nonexistent;
             }
             is.close();
+
             auto calcsum(file_checksum(name()));
             if (calcsum == checksum())
             {
@@ -154,6 +155,7 @@ class Target
                 std::string url(patch_dir + name());
                 CurlEasy curl(url);
                 curl.write_to(s);
+                curl.progressbar(true);
                 curl.perform();
 
                 ofs << s;
@@ -385,6 +387,7 @@ int main(int argc, char *argv[])
     EfuLauncher l(argv[0],
             "https://raw.github.com/commonquail/efulauncher/"\
             "master/versioncheck");
+
     if (l.has_update())
     {
         std::cout << "A new version of the launcher is available."\
