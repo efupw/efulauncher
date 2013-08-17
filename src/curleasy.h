@@ -35,8 +35,10 @@ class CurlEasy
 
         void progressbar(bool val);
 
+        struct progress_info;
     private:
         std::shared_ptr<CURL *> m_pcurl;
         bool m_used;
+        std::shared_ptr<progress_info> m_progress;
 };
 #endif //EFU_CURLEASY_H

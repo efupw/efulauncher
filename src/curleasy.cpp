@@ -6,14 +6,15 @@
 #include <iomanip>
 #include <sstream>
 
+struct CurlEasy::progress_info
+{
+    double lastruntime;
+    std::string sdltotal;
+    CURL *curl;
+};
+
 namespace
 {
-    CURL *global_curl = nullptr;
-    struct myprogress
-    {
-        double lastruntime;
-    };
-
     size_t writefunction(const char *ptr, size_t size, size_t nmemb, void *userdata)
     {
         std::string *s = static_cast<std::string *>(userdata);
@@ -45,26 +46,44 @@ namespace
             double dltotal, double dlnow,
             double ultotal, double ulnow)
     {
-        myprogress *myp = static_cast<myprogress *>(p);
+        CurlEasy::progress_info *progress
+            = static_cast<CurlEasy::progress_info *>(p);
+
         double speed(0.0);
         double curtime(0.0);
-        curl_easy_getinfo(global_curl, CURLINFO_SPEED_DOWNLOAD, &speed);
-        curl_easy_getinfo(global_curl, CURLINFO_TOTAL_TIME, &curtime);
+        curl_easy_getinfo(progress->curl,
+                CURLINFO_SPEED_DOWNLOAD, &speed);
+        curl_easy_getinfo(progress->curl,
+                CURLINFO_TOTAL_TIME, &curtime);
 
-        if (curtime - myp->lastruntime >= 0.5 || (dlnow && dlnow == dltotal))
+        if (progress->sdltotal.empty() && dltotal)
         {
-            myp->lastruntime = curtime;
+            progress->sdltotal = sizetos(dltotal);
+        }
+
+        if (curtime - progress->lastruntime >= 0.5
+                || dlnow == dltotal)
+        {
+            progress->lastruntime = curtime;
 
             std::stringstream ss;
             ss.setf(std::ios::fixed);
             ss << sizetos(dlnow)
-                << " / " << sizetos(dltotal)
+                << " / ";
+            if (dltotal)
+            {
+                ss << progress->sdltotal
                 << " ("
                 << std::setprecision(2)
                 << dlnow / dltotal * 100
                 << "%) @ " << sizetos(speed)
-                << "/s, "
-                << std::setprecision(0) << std::setw(2)
+                << "/s, ";
+            }
+            else
+            {
+                ss << "unknown";
+            }
+            ss << std::setprecision(0) << std::setw(2)
                 << curtime
                 << "s\r";
 
@@ -88,7 +107,8 @@ CurlGlobalInit::~CurlGlobalInit()
 
 CurlEasy::CurlEasy(const std::string &url):
     m_pcurl(std::make_shared<CURL *>(curl_easy_init())),
-    m_used(false)
+    m_used(false),
+    m_progress(nullptr)
 {
     if (!*m_pcurl)
     {
@@ -161,12 +181,12 @@ void CurlEasy::progressbar(bool val)
         return;
     }
 
-    myprogress progressdata = {
-        .lastruntime = 0.0
-    };
+    m_progress = std::shared_ptr<progress_info>(new progress_info);
+    m_progress->lastruntime = 0.0;
+    m_progress->sdltotal = "";
+    m_progress->curl = *m_pcurl;
 
-    global_curl = *m_pcurl;
     curl_easy_setopt(*m_pcurl, CURLOPT_NOPROGRESS, 0L);
     curl_easy_setopt(*m_pcurl, CURLOPT_PROGRESSFUNCTION, &progressfunction);
-    curl_easy_setopt(*m_pcurl, CURLOPT_PROGRESSDATA, &progressdata);
+    curl_easy_setopt(*m_pcurl, CURLOPT_PROGRESSDATA, m_progress.get());
 }
