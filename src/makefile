@@ -11,10 +11,10 @@ clobber: clean
 	del $(TARGET)
 
 $(TARGET): $(OBJS)
-    $(CXX) $(CXXFLAGS) /I"D:\Programmer\OpenSSL-Win32\include"  /I"D:\Programmer\libcurl-7.19.3\include" /Fe"$(TARGET)" $(OBJS) /link /LIBPATH:"D:\Programmer\libcurl-7.19.3\lib\Release" curllib.lib
+    $(CXX) $(CXXFLAGS) /I"D:\Programmer\OpenSSL-Win32\include" /I"D:\Programmer\libcurl-7.19.3\include" /I"D:\Programmer\OpenSSL-Win32\include" /Fe"$(TARGET)" $(OBJS) /link /LIBPATH:"D:\Programmer\libcurl-7.19.3\lib\Release" curllib.lib /LIBPATH:"D:\Programmer\OpenSSL-Win32\lib\VC" libeay32MD.lib ssleay32MD.lib
 
 .cpp.obj:
-    $(CXX) /c $(CXXFLAGS) /I"D:\Programmer\OpenSSL-Win32\include"  /I"D:\Programmer\libcurl-7.19.3\include" $< /link /LIBPATH:"D:\Programmer\libcurl-7.19.3\lib\Release" curllib.lib
+    $(CXX) /c $(CXXFLAGS) /I"D:\Programmer\OpenSSL-Win32\include"  /I"D:\Programmer\libcurl-7.19.3\include" /I"D:\Programmer\OpenSSL-Win32\include" $< /link /LIBPATH:"D:\Programmer\libcurl-7.19.3\lib\Release" curllib.lib /LIBPATH:"D:\Programmer\OpenSSL-Win32\lib\VC" libeay32MD.lib ssleay32MD.lib
 
 
 #_MSC_VER
