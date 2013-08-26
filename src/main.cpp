@@ -58,6 +58,34 @@ std::vector<std::string> split(const std::string &s, char delim)
 
 void make_dir(const std::string &path)
 {
+// TODO
+#ifdef WIN
+    unsigned file_start = path.find_last_of("/\\");
+    if (!CreateDirectory(path.substr(0, file_start).c_str(), nullptr))
+    {
+        auto err = GetLastError();
+        if (err != ERROR_ALREADY_EXISTS)
+        {
+            LPTSTR errorText = nullptr;
+            FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM
+                | FORMAT_MESSAGE_ALLOCATE_BUFFER
+                | FORMAT_MESSAGE_IGNORE_INSERTS,
+                nullptr,
+                err,
+                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                reinterpret_cast<LPTSTR>(&errorText),
+                0,
+                nullptr);
+            
+            if (errorText)
+            {
+                std::cout << "error: " << errorText << std::endl;
+                LocalFree(errorText);
+                errorText = nullptr;
+            }
+        }
+    }
+#else
     auto elems = split(path, '/');
     std::string descend;
     for (size_t i = 0, k = elems.size() - 1; i < k; ++i)
@@ -79,6 +107,7 @@ void make_dir(const std::string &path)
             }
         }
     }
+#endif
 }
 
 class Target
