@@ -110,10 +110,16 @@ void make_dir(const std::string &path)
 #endif
 }
 
+// TODO
+#ifdef CPP11_ENUM_CLASS
+#define ENUM_CLASS enum class
+#else
+#define ENUM_CLASS enum
+#endif
 class Target
 {
     public:
-        enum class Status {
+        ENUM_CLASS Status {
             Nonexistent,
             Outdated,
             Current
@@ -361,11 +367,21 @@ class EfuLauncher
                 auto data(split(*beg, '@'));
                 Target t(data[0], data[data.size() - 1]);
                 auto status = t.status();
+// TODO
+#ifdef CPP11_ENUM_CLASS
                 if (status == Target::Status::Nonexistent)
+#else
+                if (status == Target::Nonexistent)
+#endif
                 {
                     new_targets.push_back(std::move(t));
                 }
+// TODO
+#ifdef CPP11_ENUM_CLASS
                 else if (status == Target::Status::Outdated)
+#else
+                else if (status == Target::Outdated)
+#endif
                 {
                     old_targets.push_back(std::move(t));
                 }
