@@ -253,20 +253,20 @@ const std::string file_checksum(const std::string &path)
     EVP_MD_CTX_destroy(mdctx);
     std::stringstream calcsum;
     calcsum << std::setfill('0');
-    
-    for (unsigned char c : result)
+
+#ifdef CPP11_FOR_EACH
+    for (const unsigned char c : result)
+#else
+    std::for_each(std::begin(result), std::end(result),
+            [&calcsum](const unsigned char c)
+#endif
     {
         calcsum << std::hex << std::setw(2)
             << static_cast<unsigned int>(c);
     }
-    /*
-    std::for_each(std::begin(result), std::end(result),
-            [&calcsum](unsigned char c)
-            {
-            calcsum << std::hex << std::setw(2)
-            << static_cast<unsigned int>(c);
-            });
-            */
+#ifndef CPP11_FOR_EACH
+    );
+#endif
 
     return calcsum.str();
 }
@@ -389,10 +389,18 @@ class EfuLauncher
             if (new_targets.size())
             {
                 std::cout << "New targets: " << new_targets.size() << std::endl;
+#ifdef CPP11_FOR_EACH
                 for (auto &t : new_targets)
+#else
+                std::for_each(new_targets.cbegin(), new_targets.cend(),
+                    [](const Target &t)
+#endif
                 {
                     std::cout << "- " << t.name() << std::endl;
                 }
+#ifndef CPP11_FOR_EACH
+                );
+#endif
             }
             else
             {
@@ -402,25 +410,50 @@ class EfuLauncher
             if (old_targets.size())
             {
                 std::cout << "Outdated targets: " << old_targets.size() << std::endl;
+#ifdef CPP11_FOR_EACH
                 for (auto &t : old_targets)
+#else
+                std::for_each(old_targets.cbegin(), old_targets.cend(),
+                    [](const Target &t)
+#endif
                 {
                     std::cout << "- " << t.name() << std::endl;
                 }
+#ifndef CPP11_FOR_EACH
+                );
+#endif
             }
             else
             {
                 std::cout << "No targets out of date." << std::endl;
             }
 
+//            new_targets[4].fetch();
+            old_targets[0].fetch();
 #ifndef DEBUG
-            for (auto &t : new_targets)
-            {
-                t.fetch();
-            }
+#ifdef CPP11_FOR_EACH
             for (auto &t : old_targets)
+#else
+            std::for_each(old_targets.cbegin(), old_targets.cend(),
+                [](Target &t)
+#endif
             {
                 t.fetch();
             }
+#ifndef CPP11_FOR_EACH
+            );
+
+            std::for_each(old_targets.cbegin(), old_targets.cend(),
+                [](Target &t)
+#else
+            for (auto &t : old_targets)
+#endif
+            {
+                t.fetch();
+            }
+#ifndef CPP11_FOR_EACH
+            );
+#endif
 #endif
         }
         
