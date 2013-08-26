@@ -9,20 +9,28 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <sys/stat.h>
+//#include <sys/stat.h>
 #include <cerrno>
 #include <cstring>
 #include <system_error>
+
 #include <openssl/md5.h>
 #include <openssl/sha.h>
 #include <openssl/evp.h>
+/*
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <string.h>
+*/
+//#include <curl/curl.h>
 
 #include "curleasy.h"
+
+#ifdef WIN
+#include <windows.h>
+#endif
 
 const std::string version("0.1.0");
 const std::string listing("http://nwn.efupw.com/rootdir/index.dat");
