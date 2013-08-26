@@ -315,7 +315,15 @@ class EfuLauncher
             std::string fetch;
             CurlEasy curl(m_update_check.c_str());
             curl.write_to(fetch);
-            curl.perform();
+            //TODO
+            try
+            {
+                curl.perform();
+            }
+            catch (CurlEasyException &e)
+            {
+                std::cout << e.what() << std::endl;
+            }
 
             std::vector<std::string> lines(split(fetch, '\n'));
             fetch.clear();
@@ -498,7 +506,14 @@ int main(int argc, char *argv[])
         }
     }
 
-    l.stat_targets();
+    try
+    {
+        l.stat_targets();
+    }
+    catch (std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
 
     return 0;
 }
