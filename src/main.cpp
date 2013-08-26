@@ -290,7 +290,7 @@ bool confirm()
     {
         std::cin >> c;
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        c = tolower(c);
+        c = static_cast<char>(tolower(c));
     } while (c != 'y' && c != 'n');
     return c == 'y';
 }
