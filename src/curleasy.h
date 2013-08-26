@@ -5,6 +5,7 @@
 #include <memory>
 #include <stdexcept>
 #include <curl/curl.h>
+#undef max
 
 class CurlGlobalInit
 {
