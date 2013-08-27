@@ -436,8 +436,6 @@ class EfuLauncher
                 std::cout << "No targets out of date." << std::endl;
             }
 
-//            new_targets[4].fetch();
-            old_targets[0].fetch();
 #ifndef DEBUG
 #ifdef CPP11_FOR_EACH
             for (auto &t : old_targets)
