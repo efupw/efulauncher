@@ -191,7 +191,7 @@ class Target
     private:
         void do_fetch()
         {
-            std::ofstream ofs(name());
+            std::ofstream ofs(name(), std::ios::binary);
             if (ofs.good())
             {
                 std::string s;
@@ -231,7 +231,7 @@ const std::string file_checksum(const std::string &path)
 #endif
     std::array<unsigned char, md_len> result;
     EVP_MD_CTX *mdctx = nullptr;
-    std::ifstream is(path, std::ifstream::binary);
+    std::ifstream is(path, std::ios::binary);
     if (!is.good())
     {
         std::cout << "Couldn't open file " << path
