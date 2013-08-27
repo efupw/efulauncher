@@ -56,33 +56,58 @@ std::vector<std::string> split(const std::string &s, char delim)
     return split(s, delim, elems);
 }
 
+class WinErrorString
+{
+public:
+    explicit WinErrorString():
+        m_code(::GetLastError()),
+        m_error_text(nullptr),
+        m_what()
+        {
+            DWORD buf_len = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM
+                | FORMAT_MESSAGE_ALLOCATE_BUFFER
+                | FORMAT_MESSAGE_IGNORE_INSERTS,
+                nullptr,
+                m_code,
+                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                reinterpret_cast<LPTSTR>(&m_error_text),
+                0,
+                nullptr);
+            
+            if (buf_len)
+            {
+                m_what = std::string(m_error_text, m_error_text + buf_len);
+            }
+        }
+        
+    const DWORD code() const { return m_code; }
+    const std::string str() const { return m_what; }
+    
+    ~WinErrorString()
+    {
+        if (m_error_text)
+        {
+            LocalFree(m_error_text);
+            m_error_text = nullptr;
+        }
+    }
+    
+private:
+    DWORD m_code;
+    LPTSTR m_error_text;
+    std::string m_what;
+};
+
 void make_dir(const std::string &path)
 {
-// TODO
 #ifdef WIN
     unsigned file_start = path.find_last_of("/\\");
     if (!CreateDirectory(path.substr(0, file_start).c_str(), nullptr))
     {
-        auto err = GetLastError();
-        if (err != ERROR_ALREADY_EXISTS)
+        WinErrorString wes;
+        if (wes.code() != ERROR_ALREADY_EXISTS)
         {
-            LPTSTR errorText = nullptr;
-            FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM
-                | FORMAT_MESSAGE_ALLOCATE_BUFFER
-                | FORMAT_MESSAGE_IGNORE_INSERTS,
-                nullptr,
-                err,
-                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                reinterpret_cast<LPTSTR>(&errorText),
-                0,
-                nullptr);
-            
-            if (errorText)
-            {
-                std::cout << "error: " << errorText << std::endl;
-                LocalFree(errorText);
-                errorText = nullptr;
-            }
+            throw std::ios_base::failure("sdf" + wes.str());
         }
     }
 #else
