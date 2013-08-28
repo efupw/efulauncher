@@ -24,9 +24,10 @@
 #include <fcntl.h>
 #include <string.h>
 */
-//#include <curl/curl.h>
 
+#ifndef EFU_CURLEASY_H
 #include "curleasy.h"
+#endif
 
 #if defined(_WIN32) && !defined(EFU_WINERRORSTRING_H)
 #include "win_error_string.hpp"
