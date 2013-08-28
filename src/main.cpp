@@ -282,6 +282,7 @@ bool confirm()
 class EfuLauncher
 {
     public:
+    // TODO: assignment, copy operator
         explicit EfuLauncher(const std::string path,
                 const std::string update_check):
             m_path(path),
