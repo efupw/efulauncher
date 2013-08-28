@@ -1,5 +1,5 @@
 TARGET=EfULauncher.exe
-CXXFLAGS=/FI "D:/repos/efulauncher/cpp11_compliance.h" /EHsc /nologo /GS /RTCu /Zc:forScope,auto /W4 /Dmd_md5 /DDEBUG /DWIN
+CXXFLAGS=/FI "D:/repos/efulauncher/cpp11_compliance.h" /EHsc /nologo /GS /RTCu /Zc:forScope,auto /W4 /Dmd_md5 /DDEBUG
 OBJS=main.obj curleasy.obj
 
 all: $(TARGET)

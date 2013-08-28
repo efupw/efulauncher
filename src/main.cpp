@@ -58,7 +58,7 @@ std::vector<std::string> split(const std::string &s, char delim)
 
 void make_dir(const std::string &path)
 {
-#ifdef WIN
+#ifdef _WIN32
     unsigned file_start = path.find_last_of("/\\");
     if (!CreateDirectory(path.substr(0, file_start).c_str(), nullptr))
     {
