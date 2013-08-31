@@ -232,7 +232,8 @@ const std::string file_checksum(const std::string &path)
     while (status && is)
     {
         is.read(buf, length);
-        status = EVP_DigestUpdate(mdctx, buffer.data(), is.gcount());
+        status = EVP_DigestUpdate(mdctx, buffer.data(),
+            static_cast<size_t>(is.gcount()));
     }
     status = EVP_DigestFinal_ex(mdctx, result.data(), nullptr);
     EVP_MD_CTX_destroy(mdctx);
