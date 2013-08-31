@@ -424,10 +424,10 @@ class EfuLauncher
 
 #ifndef DEBUG
 #ifdef CPP11_FOR_EACH
-            for (auto &t : old_targets)
+            for (auto &t : new_targets)
 #else
-            std::for_each(old_targets.cbegin(), old_targets.cend(),
-                [](Target &t)
+            std::for_each(new_targets.cbegin(), new_targets.cend(),
+                [](const Target &t)
 #endif
             {
                 t.fetch();
@@ -436,7 +436,7 @@ class EfuLauncher
             );
 
             std::for_each(old_targets.cbegin(), old_targets.cend(),
-                [](Target &t)
+                [](const Target &t)
 #else
             for (auto &t : old_targets)
 #endif
