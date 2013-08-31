@@ -459,7 +459,7 @@ class EfuLauncher
         bool m_has_update;
 };
 
-int main(int argc, char *argv[])
+int main(int, char *argv[])
 {
     CurlGlobalInit curl_global;
 
