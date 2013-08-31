@@ -224,7 +224,7 @@ const std::string file_checksum(const std::string &path)
         return std::string();
     }
 
-    const int length = 8192;
+    const int length = 8 * 1024;
     std::array<unsigned char, length> buffer;
     auto buf = reinterpret_cast<char *>(buffer.data());
     mdctx = EVP_MD_CTX_create();
