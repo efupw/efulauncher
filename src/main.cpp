@@ -116,7 +116,7 @@ class Target
         std::string name() const { return m_name; }
         const std::string checksum() const { return m_checksum; }
 
-        void fetch()
+        void fetch() const
         {
             std::cout << "Statting target " << name() << "...";
             std::fstream fs(name(), std::ios_base::in);
@@ -152,7 +152,8 @@ class Target
                 }
             }
         }
-        Status status()
+        
+        Status status() const
         {
             std::ifstream is(name());
             if (!is.good())
@@ -173,7 +174,7 @@ class Target
         }
 
     private:
-        void do_fetch()
+        void do_fetch() const
         {
             std::ofstream ofs(name(), std::ios::binary);
             if (ofs.good())
