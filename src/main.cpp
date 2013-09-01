@@ -61,6 +61,10 @@ void make_dir(const std::string &path)
 {
 #ifdef _WIN32
     unsigned file_start = path.find_last_of("/\\");
+    if (file_start == std::string::npos)
+    {
+        return;
+    }
     if (!CreateDirectory(path.substr(0, file_start).c_str(), nullptr))
     {
         WinErrorString wes;
