@@ -70,7 +70,8 @@ void make_dir(const std::string &path)
         WinErrorString wes;
         if (wes.code() != ERROR_ALREADY_EXISTS)
         {
-            throw std::ios_base::failure("sdf" + wes.str());
+            throw std::ios_base::failure("Failed creating "
+                + path + ": " + wes.str());
         }
     }
 #else
