@@ -1,7 +1,7 @@
 RELEASE_FLAGS=/Ox
 DEBUG_FLAGS=/RTCsu /DDEBUG
 CXXFLAGS=/FIcpp11_compliance.h /EHsc \
-    /nologo /GS /Zc:forScope,auto /W4 /wd4482 /Dmd_md5
+    /nologo /GS /Zc:forScope,auto /W4 /wd4482 /Dmd_md5 /DCURL_STATICLIB
 
 # Make sure to use /nologo on recursive calls. Done this way because
 # I can't find a way to overwrite MAKEFLAGS directly.
@@ -18,7 +18,7 @@ BINARY=bin
 TARGET=$(BINARY)\$(MODE)\EfULauncher.exe
 
 OBJS=$(OBJ_DIR)\main.obj $(OBJ_DIR)\curleasy.obj
-LDLIBS=curllib.lib libeay32MD.lib ssleay32MD.lib
+LDLIBS=libcurl_a.lib libeay32MD.lib ssleay32MD.lib
 
 # Build targets. Default build is debug. Build targets are all recursive
 # in order to setup correct directory structure and compile flags.
@@ -42,13 +42,13 @@ clobber: clean
 $(TARGET): $(OBJS)
     @ if not exist $(@D) mkdir $(@D)
     link /nologo /out:"$(TARGET)" $(OBJS) \
-        /libpath:"D:\Programmer\libcurl-7.19.3\lib\Release" \
+        /libpath:"..\curl\builds\libcurl-vc10-x86-release-static-ssl-static-ipv6-spnego\lib" \
         /libpath:"D:\Programmer\OpenSSL-Win32\lib\VC" \
         $(LDLIBS)
 
 {$(SOURCES)}.cpp{$(OBJ_DIR)}.obj:
     @ if not exist $(@D) mkdir $(@D)
-    $(CXX) /c $(CXXFLAGS) \
+    $(CXX) /c $(CXXFLAGS) /MD \
     /I"D:\Programmer\OpenSSL-Win32\include" \
-    /I"D:\Programmer\libcurl-7.19.3\include" \
+    /I"..\curl\builds\libcurl-vc10-x86-release-static-ssl-static-ipv6-spnego\include" \
     $(<) /Fo"$(@)"
