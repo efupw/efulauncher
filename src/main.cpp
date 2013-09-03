@@ -468,6 +468,54 @@ int main(int, char *argv[])
 {
     CurlGlobalInit curl_global;
 
+    std::string nwn_bin("nwmain.exe");
+    std::string nwn_root_dir("./");
+    std::ifstream nwn(nwn_root_dir + nwn_bin, std::ios::binary);
+    if (!nwn)
+    {
+        nwn_root_dir = "C:/NeverwinterNights/NWN/";
+        std::cout << "Current launcher directory not detected as NWN root"\
+        " directory.\nTrying " << nwn_root_dir << "...";
+    }
+    /*
+    nwn.open(nwn_root_dir + nwn_bin, std::ios::binary);
+    if (!nwn)
+    {
+        // Program Files (x86)?
+        nwn_root_dir = "C:/NeverwinterNights/NWN/";
+        std::cout << " not found.\nTrying " << nwn_root_dir << "...";
+    }
+    nwn.open(nwn_root_dir + nwn_bin, std::ios::binary);
+    if (!nwn)
+    {
+        // HKLM/Software/BioWare/NWN/Neverwinter/Location
+        // HKLM/Software/BioWare/NWN/Neverwinter/Version="1.11"
+        nwn_root_dir = "C:/NeverwinterNights/NWN/";
+        std::cout << " not found.\nTrying " << nwn_root_dir << "...";
+    }
+    */
+    nwn.open(nwn_root_dir + nwn_bin, std::ios::binary);
+    if (!nwn)
+    {
+        std::cout << " not found.\nNWN root directory not found, known"\
+            " options exhausted."\
+            " The launcher will not be able to download files to the correct"\
+            " location or launch Neverwinter Nights, however, the launcher"\
+            " may still download files to the current directory and you can"\
+            " move them manually afterwards. To avoid this in the future"\
+            " either move the launcher to the NWN root directory containing"\
+            " nwmain.exe or pass the -nwn=C:/NeverwinterNights/NWN flag to"\
+            " the launcher executable, substituting the correct path, quoted"\
+            " if it contains spaces: -nwn=\"X:/Games/Neverwinter Nights/NWN\"."\
+            " / and \\ are interchangeable."\
+            "\nWould you like to download files anyway (y/n)?" << std::endl;
+        if (!confirm())
+        {
+            std::cout << "Exiting EfU Launcher. Goodbye!" << std::endl;
+            return 0;
+        }
+    }
+
     EfuLauncher l(argv[0],
             "https://raw.github.com/commonquail/efulauncher/"\
             "master/versioncheck");
