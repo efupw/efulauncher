@@ -6,9 +6,10 @@
 
 const std::string patch_dir("http://nwn.efupw.com/rootdir/patch/");
 
-std::vector<std::string> &split(const std::string &s, char delim,
-        std::vector<std::string> &elems);
-std::vector<std::string> split(const std::string &s, char delim);
+typedef std::vector<std::string> strvec;
+
+strvec &split(const std::string &s, char delim, strvec &elems);
+strvec split(const std::string &s, char delim);
 
 const std::string file_checksum(const std::string &path);
 

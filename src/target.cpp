@@ -72,8 +72,7 @@ namespace
     }
 }
 
-std::vector<std::string> &split(const std::string &s, char delim,
-        std::vector<std::string> &elems)
+strvec &split(const std::string &s, char delim, strvec &elems)
 {
     std::stringstream ss(s);
     std::string item;
@@ -84,9 +83,9 @@ std::vector<std::string> &split(const std::string &s, char delim,
     return elems;
 }
 
-std::vector<std::string> split(const std::string &s, char delim)
+strvec split(const std::string &s, char delim)
 {
-    std::vector<std::string> elems;
+    strvec elems;
     return split(s, delim, elems);
 }
 
