@@ -1,6 +1,4 @@
 #include <limits>
-#include <algorithm>
-#include <memory>
 //#include <sys/stat.h>
 #include <cerrno>
 #include <cstring>
@@ -24,8 +22,12 @@
 
 #endif
 
-#ifndef EFU_TARGET_H
+#ifndef EFU_EFULAUNCHER_H
 #include "efulauncher.h"
+#endif
+
+#ifndef EFU_CURLEASY_H
+#include "curleasy.h"
 #endif
 
 bool confirm()
