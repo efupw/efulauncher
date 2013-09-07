@@ -32,7 +32,7 @@
 #ifdef _WIN32
 
 #ifndef EFU_WINERRORSTRING_H
-#include "win_error_string.hpp"
+#include "win_error_string.h"
 #endif
 
 #ifndef EFU_SIMPLEREADHKLMKEY_H

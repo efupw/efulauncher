@@ -17,7 +17,11 @@ OBJ_DIR=$(SYMBOLS)\$(MODE)
 BINARY=bin
 TARGET=$(BINARY)\$(MODE)\EfULauncher.exe
 
-OBJS=$(OBJ_DIR)\main.obj $(OBJ_DIR)\curleasy.obj $(OBJ_DIR)\simple_read_hklm_key.obj
+OBJS=$(OBJ_DIR)\main.obj\
+    $(OBJ_DIR)\curleasy.obj\
+    $(OBJ_DIR)\win_error_string.obj\
+    $(OBJ_DIR)\simple_read_hklm_key.obj
+
 LDLIBS=libcurl_a.lib libeay32MD.lib ssleay32MD.lib
 
 # Build targets. Default build is debug. Build targets are all recursive
