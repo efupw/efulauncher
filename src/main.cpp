@@ -124,6 +124,7 @@ int main(int argc, char *argv[])
             std::cout << "Exiting EfU Launcher. Goodbye!" << std::endl;
             return 0;
         }
+        nwn_root_dir = "./";
     }
 #endif
 
