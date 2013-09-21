@@ -16,6 +16,7 @@ SYMBOLS=symbols
 OBJ_DIR=$(SYMBOLS)\$(MODE)
 BINARY=bin
 TARGET=$(BINARY)\$(MODE)\EfULauncher.exe
+RESOURCES=res
 
 OBJS=$(OBJ_DIR)\main.obj\
     $(OBJ_DIR)\curleasy.obj\
@@ -47,6 +48,7 @@ clobber: clean
 
 $(TARGET): $(OBJS)
     @ if not exist $(@D) mkdir $(@D)
+    @ if exist $(RESOURCES) copy $(RESOURCES)\* $(@D)
     link /nologo /out:"$(TARGET)" $(OBJS) \
         /libpath:"..\curl\builds\libcurl-vc10-x86-release-static-ssl-static-ipv6-spnego\lib" \
         /libpath:"D:\Programmer\OpenSSL-Win32\lib\VC" \
