@@ -7,8 +7,11 @@ class EfuLauncher
 {
     public:
     // TODO: assignment, copy operator
-        explicit EfuLauncher(const std::string path,
-                const std::string update_check);
+        explicit EfuLauncher(const std::string &path,
+                const std::string &update_check);
+        
+        //explicit EfuLauncher(std::string &&path,
+        //        std::string &&update_check);
 
         bool has_update();
         bool get_update();

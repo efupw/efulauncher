@@ -31,8 +31,8 @@ namespace Options
     }
 };
 
-EfuLauncher::EfuLauncher(const std::string path,
-            const std::string update_check):
+EfuLauncher::EfuLauncher(const std::string &path ,
+            const std::string &update_check):
     m_path(path),
     m_update_check(update_check),
     m_has_update(false)
