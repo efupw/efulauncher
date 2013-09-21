@@ -5,6 +5,7 @@
 #include <system_error>
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 /*
 #include <stdio.h>
@@ -18,6 +19,14 @@
 
 #ifndef EFU_SIMPLEREADHKLMKEY_H
 #include "simple_read_hklm_key.h"
+#endif
+
+#ifndef EFU_TARGET_H
+#include "target.h"
+#endif
+
+#ifndef EFU_WINERRORSTRING_H
+#include "win_error_string.h"
 #endif
 
 #endif
@@ -44,7 +53,7 @@ bool confirm()
 
 
 
-int main(int, char *argv[])
+int main(int argc, char *argv[])
 {
     CurlGlobalInit curl_global;
 
@@ -154,6 +163,80 @@ int main(int, char *argv[])
     {
         std::cerr << e.what() << std::endl;
     }
+
+#ifdef _WIN32
+    if (nwn)
+    {
+        STARTUPINFO si;
+        PROCESS_INFORMATION pi;
+        ::ZeroMemory(&pi, sizeof(pi));
+        ::ZeroMemory(&si, sizeof(si));
+        si.cb = sizeof(si);
+        
+        auto nwn_path(nwn_root_dir + nwn_bin);
+        auto cmd_line(nwn_path + " +connect nwn.efupw.com:5121");
+        
+        const std::vector<const std::string> args(argv + 1, argv + argc);
+
+        for (size_t i = 0; i < args.size(); ++i)
+        {
+            auto arg(args.at(i));
+            
+            if (arg.find("-dmpass") == 0)
+            {
+                auto cmd(split(arg, '='));
+                if (cmd.size() == 2)
+                {
+                    cmd_line.append(" -dmc +password " + cmd.at(1));
+                }
+                else
+                {
+                    std::cout << "-dmpass specified but no value given. Use\n"\
+                        "-dmpass=mypassword" <<std::endl;
+                }
+            }
+            else if (arg.find("-nwn") == 0)
+            {
+                auto cmd(split(arg, '='));
+                if (cmd.size() == 2)
+                {
+//                    cmd_line.append(" -nwn " + cmd.at(1));
+                }
+                else
+                {
+                    std::cout << "-nwn specified but no value given. Use\n"\
+                        "-nwn=\"path\\to\\NWN\\directory\\" <<std::endl;
+                }
+            }
+            else
+            {
+                std::cout << "Ignoring unrecognized argument: " << arg
+                    << std::endl;
+            }
+        }
+
+        BOOL success = ::CreateProcess(
+            const_cast<char *>(nwn_path.c_str()),
+            const_cast<char *>(cmd_line.c_str()),
+            NULL,           // Process handle not inheritable
+            NULL,           // Thread handle not inheritable
+            FALSE,          // Set handle inheritance to FALSE
+            0,              // No creation flags
+            NULL,           // Use parent's environment block
+            const_cast<char *>(nwn_root_dir.c_str()),           // Starting directory 
+            &si, &pi);
+        if (success)
+        {
+            ::CloseHandle(pi.hProcess);
+            ::CloseHandle(pi.hThread);
+        }
+        else
+        {
+            WinErrorString we;
+            std::cout << we.str() << std::endl;
+        }
+    }
+#endif
 
     return 0;
 }
