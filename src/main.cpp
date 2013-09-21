@@ -199,6 +199,12 @@ int main(int argc, char *argv[])
 
     if (l.has_update())
     {
+        std::cout << "A new version of the launcher is available. Please"\
+            " download it at https://github.com/commonquail/efulauncher/"\
+            "releases. Press any key to exit." << std::endl;
+        std::cin.get();
+        return 0;
+        /*
         std::cout << "A new version of the launcher is available."\
             " Would you like to download it (y/n)?" << std::endl;
         bool download(confirm());
@@ -219,6 +225,7 @@ int main(int argc, char *argv[])
             }
             return 0;
         }
+        */
     }
 
     try
