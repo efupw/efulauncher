@@ -159,6 +159,7 @@ int main(int argc, char *argv[])
     try
     {
         l.stat_targets();
+        std::cout << "Done." << std::endl;
     }
     catch (std::exception &e)
     {
