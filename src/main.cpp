@@ -169,6 +169,8 @@ int main(int argc, char *argv[])
 #ifdef _WIN32
     if (nwn)
     {
+        std::cout << "Launching " << nwn_root_dir + nwn_bin << "..." << std::endl;
+
         STARTUPINFO si;
         PROCESS_INFORMATION pi;
         ::ZeroMemory(&pi, sizeof(pi));
