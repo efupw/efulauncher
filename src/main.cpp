@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
     }
 #endif
 
-    EfuLauncher l(argv[0],
+    EfuLauncher l(nwn_root_dir,
             "https://raw.github.com/commonquail/efulauncher/"\
             "master/versioncheck");
 

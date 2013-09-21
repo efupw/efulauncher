@@ -142,7 +142,9 @@ const std::string file_checksum(const std::string &path)
     return calcsum.str();
 }
 
-Target::Target(const std::string &name, const std::string &checksum):
+Target::Target(const std::string &dlpath,
+    const std::string &name, const std::string &checksum):
+    m_dlpath(dlpath),
     m_name(name.find_first_of('/') == std::string::npos
         ? name : name, name.find_first_of('/') + 1, name.size() - 1),
     m_checksum(checksum)
@@ -152,17 +154,17 @@ Target::Target(const std::string &name, const std::string &checksum):
 void Target::fetch() const
 {
     std::cout << "Statting target " << name() << "...";
-    std::fstream fs(name(), std::ios_base::in);
+    std::fstream fs(dlpath() + name(), std::ios_base::in);
     if (!fs.good())
     {
         fs.close();
         std::cout << " doesn't exist, creating new." << std::endl;
-        make_dir(name());
-        fs.open(name(), std::ios_base::out);
+        make_dir(dlpath() + name());
+        fs.open(dlpath() + name(), std::ios_base::out);
         if (!fs.good())
         {
             fs.close();
-            std::cout << "Failed to create file: " << name() << std::endl;
+            std::cout << "Failed to create file: " << dlpath() + name() << std::endl;
         }
         else
         {
@@ -188,14 +190,14 @@ void Target::fetch() const
 
 Target::Status Target::status() const
 {
-    std::ifstream is(name());
+    std::ifstream is(dlpath() + name());
     if (!is.good())
     {
         return Status::Nonexistent;
     }
     is.close();
 
-    auto calcsum(file_checksum(name()));
+    auto calcsum(file_checksum(dlpath() + name()));
     if (calcsum == checksum())
     {
         return Status::Current;
@@ -208,7 +210,7 @@ Target::Status Target::status() const
 
 void Target::do_fetch() const
 {
-    std::ofstream ofs(name(), std::ios::binary);
+    std::ofstream ofs(dlpath() + name(), std::ios::binary);
     if (ofs.good())
     {
         std::string s;
@@ -224,6 +226,6 @@ void Target::do_fetch() const
     }
     else
     {
-        std::cout << "Couldn't write to " << name() << std::endl;
+        std::cout << "Couldn't write to " << dlpath() + name() << std::endl;
     }
 }

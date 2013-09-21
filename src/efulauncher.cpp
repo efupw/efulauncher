@@ -107,7 +107,7 @@ void EfuLauncher::stat_targets()
             beg != end; ++beg)
     {
         auto data(split(*beg, '@'));
-        Target t(data[0], data[data.size() - 1]);
+        Target t(path(), data[0], data[data.size() - 1]);
         auto status = t.status();
 // TODO
 #ifdef CPP11_ENUM_CLASS

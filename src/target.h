@@ -27,7 +27,8 @@ class Target
             Current
         };
         
-        explicit Target(const std::string &name, const std::string &checksum);
+        explicit Target(const std::string &dlpath,
+            const std::string &name, const std::string &checksum);
 
         const std::string name() const { return m_name; }
         const std::string checksum() const { return m_checksum; }
@@ -35,9 +36,11 @@ class Target
         Status status() const;
 
     private:
+        std::string m_dlpath;
         std::string m_name;
         std::string m_checksum;
 
+        const std::string dlpath() const { return m_dlpath; }
         void do_fetch() const;
 };
 
