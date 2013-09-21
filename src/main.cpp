@@ -56,15 +56,79 @@ bool confirm()
 int main(int argc, char *argv[])
 {
     CurlGlobalInit curl_global;
+    bool arg_errors = false;
 
 #ifdef _WIN32
     std::string nwn_bin("nwmain.exe");
     std::string nwn_root_dir("./");
+#endif
+
+    std::string cmd_line(" +connect nwn.efupw.com:5121");
+    
+    const std::vector<const std::string> args(argv + 1, argv + argc);
+
+    std::cout << "Processing command line arguments." << std::endl;
+    for (size_t i = 0; i < args.size(); ++i)
+    {
+        auto arg(args.at(i));
+        
+        if (arg.find("-dmpass") == 0)
+        {
+            auto cmd(split(arg, '='));
+            if (cmd.size() == 2)
+            {
+                cmd_line.append(" -dmc +password " + cmd.at(1));
+            }
+            else
+            {
+                std::cout << "-dmpass specified but no value given. Use\n"\
+                    "-dmpass=mypassword" <<std::endl;
+                arg_errors = true;
+            }
+        }
+        else if (arg.find("-nwn") == 0)
+        {
+            auto cmd(split(arg, '='));
+            if (cmd.size() == 2)
+            {
+                nwn_root_dir = cmd.at(1);
+            }
+            else
+            {
+                std::cout << "-nwn specified but no value given. Use\n"\
+                    "-nwn=\"path\\to\\NWN\\directory\\\"" <<std::endl;
+                arg_errors = true;
+            }
+        }
+        else
+        {
+            std::cout << "Ignoring unrecognized argument: " << arg
+                << std::endl;
+            arg_errors = true;
+        }
+    }
+    
+    if (arg_errors)
+    {
+        std::cout << "Argument errors. Press a key to continue." << std::endl;
+        std::cin.get();
+    }
+
+#ifdef _WIN32
     std::ifstream nwn(nwn_root_dir + nwn_bin, std::ios::binary);
+    
+    if (!nwn && nwn_root_dir != "./")
+    {
+        std::cout << nwn_root_dir << " not detected as NWN root directory."\
+            "\nTrying current launcher directory...\n";
+        nwn_root_dir = "./";
+        nwn.open(nwn_root_dir + nwn_bin, std::ios::binary);
+    }
+
     if (!nwn)
     {
         std::cout << "Current launcher directory not detected as NWN root"\
-        " directory.";
+            " directory.";
         nwn_root_dir = "C:/NeverwinterNights/NWN/";
         std::cout << "\nTrying " << nwn_root_dir << "... ";
         nwn.open(nwn_root_dir + nwn_bin, std::ios::binary);
@@ -96,9 +160,10 @@ int main(int argc, char *argv[])
             }
         }
     }
+    
     if (nwn)
     {
-        std::cout << nwn_bin << " found." << std::endl;
+        std::cout << nwn_root_dir + nwn_bin << " found." << std::endl;
     }
     else
     {
@@ -178,46 +243,7 @@ int main(int argc, char *argv[])
         si.cb = sizeof(si);
         
         auto nwn_path(nwn_root_dir + nwn_bin);
-        auto cmd_line(nwn_path + " +connect nwn.efupw.com:5121");
-        
-        const std::vector<const std::string> args(argv + 1, argv + argc);
-
-        for (size_t i = 0; i < args.size(); ++i)
-        {
-            auto arg(args.at(i));
-            
-            if (arg.find("-dmpass") == 0)
-            {
-                auto cmd(split(arg, '='));
-                if (cmd.size() == 2)
-                {
-                    cmd_line.append(" -dmc +password " + cmd.at(1));
-                }
-                else
-                {
-                    std::cout << "-dmpass specified but no value given. Use\n"\
-                        "-dmpass=mypassword" <<std::endl;
-                }
-            }
-            else if (arg.find("-nwn") == 0)
-            {
-                auto cmd(split(arg, '='));
-                if (cmd.size() == 2)
-                {
-//                    cmd_line.append(" -nwn " + cmd.at(1));
-                }
-                else
-                {
-                    std::cout << "-nwn specified but no value given. Use\n"\
-                        "-nwn=\"path\\to\\NWN\\directory\\" <<std::endl;
-                }
-            }
-            else
-            {
-                std::cout << "Ignoring unrecognized argument: " << arg
-                    << std::endl;
-            }
-        }
+        cmd_line = nwn_path + cmd_line;
 
         BOOL success = ::CreateProcess(
             const_cast<char *>(nwn_path.c_str()),
