@@ -15,7 +15,7 @@
 
 namespace
 {
-    const std::string version("0.1.0");
+    const std::string version("1.0.0");
     const std::string listing("http://nwn.efupw.com/rootdir/index.dat");
 }
 
