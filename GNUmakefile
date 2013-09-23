@@ -4,7 +4,7 @@ CXXFLAGS_RELEASE=-Wall -Werror -std=c++11 -Dmd_md5 -O3
 CXXFLAGS=$(CXXFLAGS_DEBUG)
 LDLIBS=-lcurl -lssl
 
-SRCS=src/main.cpp src/curleasy.cpp
+SRCS=src/curleasy.cpp src/efulauncher.cpp src/target.cpp src/main.cpp
 OBJS=$(subst .cpp,.o,$(SRCS))
 
 OUTDIR=bin
