@@ -48,9 +48,9 @@ int main(int argc, char *argv[])
     bool arg_errors = false;
 
 #ifdef _WIN32
-    std::string nwn_bin("nwmain.exe");
+    const std::string nwn_bin("nwmain.exe");
 #else
-    std::string nwn_bin("nwmain");
+    const std::string nwn_bin("nwmain");
 #endif
     std::string nwn_root_dir("./");
 
