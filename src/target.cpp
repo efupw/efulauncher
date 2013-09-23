@@ -23,6 +23,11 @@
 #include "win_error_string.h"
 #endif
 
+#else
+
+#include <sys/stat.h>
+#include <system_error>
+
 #endif
 
 namespace
