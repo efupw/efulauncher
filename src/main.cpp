@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     std::cout << "Processing command line arguments." << std::endl;
     for (size_t i = 0; i < args.size(); ++i)
     {
-        auto arg(args.at(i));
+        const auto arg(args.at(i));
         
         if (arg.find("-dmpass") == 0)
         {
