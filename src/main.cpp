@@ -3,6 +3,7 @@
 #include <fstream>
 #include <vector>
 
+#include <algorithm>
 #ifdef _WIN32
 
 #ifndef EFU_SIMPLEREADHKLMKEY_H
@@ -58,10 +59,14 @@ int main(int argc, char *argv[])
     const std::vector<std::string> args(argv + 1, argv + argc);
 
     std::cout << "Processing command line arguments." << std::endl;
-    for (size_t i = 0; i < args.size(); ++i)
+
+#ifdef CPP11_FOR_EACH
+    for (const auto arg : args)
+#else
+    std::for_each(args.cbegin(), args.cend(),
+            [&cmd_line, &nwn_root_dir, &arg_errors](const std::string &arg)
+#endif
     {
-        const auto arg(args.at(i));
-        
         if (arg.find("-dmpass") == 0)
         {
             auto cmd(split(arg, '='));
@@ -97,6 +102,9 @@ int main(int argc, char *argv[])
             arg_errors = true;
         }
     }
+#ifndef CPP11_FOR_EACH
+    );
+#endif
     
     if (arg_errors)
     {
