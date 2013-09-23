@@ -40,8 +40,6 @@ bool confirm()
     return c == 'y';
 }
 
-
-
 int main(int argc, char *argv[])
 {
     CurlGlobalInit curl_global;
@@ -64,7 +62,8 @@ int main(int argc, char *argv[])
     for (const auto arg : args)
 #else
     std::for_each(args.cbegin(), args.cend(),
-            [&cmd_line, &nwn_root_dir, &arg_errors](const std::string &arg)
+            [&cmd_line, &nwn_root_dir, &arg_errors]
+            (const std::string &arg)
 #endif
     {
         if (arg.find("-dmpass") == 0)
