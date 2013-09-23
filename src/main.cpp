@@ -19,14 +19,14 @@
 #include "simple_read_hklm_key.h"
 #endif
 
-#ifndef EFU_TARGET_H
-#include "target.h"
-#endif
-
 #ifndef EFU_WINERRORSTRING_H
 #include "win_error_string.h"
 #endif
 
+#endif
+
+#ifndef EFU_TARGET_H
+#include "target.h"
 #endif
 
 #ifndef EFU_EFULAUNCHER_H
