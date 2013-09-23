@@ -1,17 +1,7 @@
 #include <limits>
-#include <cerrno>
-#include <cstring>
 #include <iostream>
 #include <fstream>
 #include <vector>
-
-/*
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/mman.h>
-#include <fcntl.h>
-#include <string.h>
-*/
 
 #ifdef _WIN32
 
