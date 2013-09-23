@@ -58,8 +58,10 @@ int main(int argc, char *argv[])
 
 #ifdef _WIN32
     std::string nwn_bin("nwmain.exe");
-    std::string nwn_root_dir("./");
+#else
+    std::string nwn_bin("nwmain");
 #endif
+    std::string nwn_root_dir("./");
 
     std::string cmd_line(" +connect nwn.efupw.com:5121");
     
