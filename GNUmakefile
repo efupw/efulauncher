@@ -12,6 +12,8 @@ TARGET=efulauncher
 
 RM=rm -f
 
+dummy := $(shell test -d $(OUTDIR) || mkdir -p $(OUTDIR))
+
 .PHONY: debug
 debug: CXXFLAGS+=$(CXXFLAGS_DEBUG)
 debug: all
