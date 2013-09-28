@@ -57,7 +57,7 @@ namespace
         for (size_t i = 0, k = elems.size() - 1; i < k; ++i)
         {
             const std::string &s(elems[i]);
-            if (s.size() && s != ".")
+            if (s.size())
             {
                 descend.append((i > 0 ? "/" : "") + s);
                 auto status = mkdir(descend.c_str(), S_IRWXU);
