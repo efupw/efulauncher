@@ -1,7 +1,7 @@
 CXX=g++
-CXXFLAGS_DEBUG=-Wall -Werror -std=c++11 -Dmd_md5 -DDEBUG
-CXXFLAGS_RELEASE=-Wall -Werror -std=c++11 -Dmd_md5 -O3
-CXXFLAGS=$(CXXFLAGS_DEBUG)
+CXXFLAGS_DEBUG=-DDEBUG
+CXXFLAGS_RELEASE=-O3
+CXXFLAGS=-Wall -Werror -std=c++11 -Dmd_md5 -include src/cpp11_compliance.h
 LDLIBS=-lcurl -lssl
 
 SRCS=src/curleasy.cpp src/efulauncher.cpp src/target.cpp src/main.cpp
@@ -11,6 +11,10 @@ OUTDIR=bin
 TARGET=efulauncher
 
 RM=rm -f
+
+.PHONY: debug
+debug: CXXFLAGS+=$(CXXFLAGS_DEBUG)
+debug: all
 
 .PHONY: all
 all: $(TARGET)
@@ -23,7 +27,7 @@ run: all
 	cd $(OUTDIR) && ./$(TARGET) && cd ..
 
 .PHONY: release
-release: CXXFLAGS=$(CXXFLAGS_RELEASE)
+release: CXXFLAGS+=$(CXXFLAGS_RELEASE)
 release: all
 
 clean:
