@@ -9,6 +9,7 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include <vector>
 
 struct CurlEasy::progress_info
 {
@@ -115,11 +116,11 @@ namespace
         return 0;
     }
     
-    /*
-     * DigiCert High Assurance EV Root CA certificate in PEM format taken from
-     * http://curl.haxx.se/docs/caextract.html
-    */
-    const std::string certificate(
+    // PEM format certificates taken from
+    // http://curl.haxx.se/docs/caextract.html
+    std::string certs[] = {
+        "DigiCert High Assurance EV Root CA\n"\
+        "==================================\n"\
         "-----BEGIN CERTIFICATE-----\n"\
         "MIIDxTCCAq2gAwIBAgIQAqxcJmoLQJuPC3nyrkYldzANBgkqhkiG9w0BAQUFADBsMQswCQYDVQQG\n"\
         "EwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3d3cuZGlnaWNlcnQuY29tMSsw\n"\
@@ -138,28 +139,49 @@ namespace
         "myPInngiK3BD41VHMWEZ71jFhS9OMPagMRYjyOfiZRYzy78aG6A9+MpeizGLYAiJLQwGXFK3xPkK\n"\
         "mNEVX58Svnw2Yzi9RKR/5CYrCsSXaQ3pjOLAEFe4yHYSkVXySGnYvCoCWw9E1CAx2/S6cCZdkGCe\n"\
         "vEsXCS+0yx5DaMkHJ8HSXPfqIbloEpw8nL+e/IBcm2PN7EeqJSdnoDfzAIJ9VNep+OkuE6N36B9K\n"\
-        "-----END CERTIFICATE-----\n");
+        "-----END CERTIFICATE-----\n",
+        "Verisign Class 3 Public Primary Certification Authority - G2\n"\
+        "============================================================\n"\
+        "-----BEGIN CERTIFICATE-----\n"\
+        "MIIDAjCCAmsCEH3Z/gfPqB63EHln+6eJNMYwDQYJKoZIhvcNAQEFBQAwgcExCzAJBgNVBAYTAlVT\n"\
+        "MRcwFQYDVQQKEw5WZXJpU2lnbiwgSW5jLjE8MDoGA1UECxMzQ2xhc3MgMyBQdWJsaWMgUHJpbWFy\n"\
+        "eSBDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eSAtIEcyMTowOAYDVQQLEzEoYykgMTk5OCBWZXJpU2ln\n"\
+        "biwgSW5jLiAtIEZvciBhdXRob3JpemVkIHVzZSBvbmx5MR8wHQYDVQQLExZWZXJpU2lnbiBUcnVz\n"\
+        "dCBOZXR3b3JrMB4XDTk4MDUxODAwMDAwMFoXDTI4MDgwMTIzNTk1OVowgcExCzAJBgNVBAYTAlVT\n"\
+        "MRcwFQYDVQQKEw5WZXJpU2lnbiwgSW5jLjE8MDoGA1UECxMzQ2xhc3MgMyBQdWJsaWMgUHJpbWFy\n"\
+        "eSBDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eSAtIEcyMTowOAYDVQQLEzEoYykgMTk5OCBWZXJpU2ln\n"\
+        "biwgSW5jLiAtIEZvciBhdXRob3JpemVkIHVzZSBvbmx5MR8wHQYDVQQLExZWZXJpU2lnbiBUcnVz\n"\
+        "dCBOZXR3b3JrMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDMXtERXVxp0KvTuWpMmR9ZmDCO\n"\
+        "FoUgRm1HP9SFIIThbbP4pO0M8RcPO/mn+SXXwc+EY/J8Y8+iR/LGWzOOZEAEaMGAuWQcRXfH2G71\n"\
+        "lSk8UOg013gfqLptQ5GVj0VXXn7F+8qkBOvqlzdUMG+7AUcyM83cV5tkaWH4mx0ciU9cZwIDAQAB\n"\
+        "MA0GCSqGSIb3DQEBBQUAA4GBAFFNzb5cy5gZnBWyATl4Lk0PZ3BwmcYQWpSkU01UbSuvDV1Ai2TT\n"\
+        "1+7eVmGSX6bEHRBhNtMsJzzoKQm5EWR0zLVznxxIqbxhAe7iF6YM40AIOw7n60RzKprxaZLvcRTD\n"\
+        "Oaxxp5EJb+RxBrO6WVcmeQD2+A2iMzAo1KpYoJ2daZH9\n"\
+        "-----END CERTIFICATE-----\n"
+    };
 
     CURLcode sslctxfunction(CURL * const, void * const sslctx, void * const)
     {
-        BIO * const bio = BIO_new_mem_buf(const_cast<char *>(certificate.c_str()),
-            certificate.length());
-        /*
-        Read the PEM formatted certificate from memory into an X509 struct that
-        SSL can use.
-        */ 
-        X509 * const cert = PEM_read_bio_X509(bio, nullptr, 0, nullptr);
-        if (!cert)
+        X509_STORE *store = SSL_CTX_get_cert_store(static_cast<const SSL_CTX *>(sslctx));
+        for (auto beg = std::begin(certs); beg != std::end(certs); ++beg)
         {
-            return CURLE_SSL_CERTPROBLEM;
-        }
+            BIO *bio = BIO_new_mem_buf(const_cast<char *>(beg->c_str()),
+                beg->length());
 
-        X509_STORE * const store = SSL_CTX_get_cert_store(static_cast<const SSL_CTX *>(sslctx));
-        if (X509_STORE_add_cert(store, cert) == 0)
-        {
-            return CURLE_SSL_CERTPROBLEM;
-        }
+            // Read the PEM formatted certificate from memory into an X509
+            // struct that SSL can use.
+            X509 *cert = PEM_read_bio_X509(bio, nullptr, 0, nullptr);
+            if (!cert)
+            {
+                return CURLE_SSL_CERTPROBLEM;
+            }
 
+            if (X509_STORE_add_cert(store, cert) == 0)
+            {
+                return CURLE_SSL_CERTPROBLEM;
+            }
+        }
+        
         return CURLE_OK ;
     }
     
