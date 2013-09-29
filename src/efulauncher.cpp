@@ -15,7 +15,11 @@
 
 namespace
 {
-    const std::string version("1.0.0");
+#ifdef _WIN32
+    const std::string version("1.1.0");
+#else
+    const std::string version("1.1.0");
+#endif
     const std::string listing("http://nwn.efupw.com/rootdir/index.dat");
 }
 
@@ -23,7 +27,11 @@ namespace Options
 {
     bool version(const std::string &val)
     {
-        return val == "version";
+#ifdef _WIN32
+        return val == "win-version";
+#else
+        return val == "lin-version";
+#endif
     }
     bool update_path(const std::string &val)
     {
