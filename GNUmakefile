@@ -36,6 +36,10 @@ $(OBJ_DIR)/$(MODE)/%.o: $(SRC_DIR)/%.cpp
 	$(shell test -d $(@D) || mkdir -p $(@D))
 	$(CXX) -c -o $(@) $(CXXFLAGS) $(LDLIBS) $(<)
 
+.PHONY: run
+run:
+	cd $(BIN_DIR)/$(MODE) && ./efulauncher && cd -
+
 .PHONY: clean
 clean:
 	$(RM) -r symbols
