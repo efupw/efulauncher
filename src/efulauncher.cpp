@@ -3,6 +3,7 @@
 #endif
 
 #include <iostream>
+#include <fstream>
 #include <algorithm>
 
 #ifndef EFU_TARGET_H
@@ -119,7 +120,45 @@ bool EfuLauncher::get_update()
     {
         return m_has_update = false;
     }
-    return !(m_has_update = false);
+    // Token replacement performed here because we're guaranteed to have all
+    // values.
+    replace_all(m_update_path, "{version}", m_version);
+    replace_all(m_update_path, "{platform}",
+#ifdef _WIN32
+    "win"
+#else
+    "lin"
+#endif
+    );
+
+    size_t pos = 0;
+    if ((pos = m_update_path.rfind("/")) == std::string::npos)
+    {
+        throw std::runtime_error("Couldn't find '/' in update path to"\
+                " determine file name.");
+    }
+
+    // m_update_path.substr(pos) begins with "/".
+    const std::string dlpath("." + m_update_path.substr(pos));
+    std::string fetch;
+    CurlEasy curl(m_update_path);
+    curl.write_to(fetch);
+    curl.progressbar(true);
+    curl.perform();
+
+    std::ofstream ofs(dlpath, std::ios::binary);
+    if (ofs)
+    {
+        ofs << fetch;
+        ofs.close();
+        m_has_update = false;
+    }
+    else
+    {
+        throw std::runtime_error("Couldn't write to " + dlpath);
+    }
+
+    return !m_has_update;
 }
 
 void EfuLauncher::stat_targets()
