@@ -171,12 +171,7 @@ namespace
             // Read the PEM formatted certificate from memory into an X509
             // struct that SSL can use.
             X509 *cert = PEM_read_bio_X509(bio, nullptr, 0, nullptr);
-            if (!cert)
-            {
-                return CURLE_SSL_CERTPROBLEM;
-            }
-
-            if (X509_STORE_add_cert(store, cert) == 0)
+            if (!cert || X509_STORE_add_cert(store, cert) == 0)
             {
                 return CURLE_SSL_CERTPROBLEM;
             }
