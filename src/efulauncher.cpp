@@ -21,6 +21,24 @@ namespace
     const std::string version("1.1.0");
 #endif
     const std::string listing("http://nwn.efupw.com/rootdir/index.dat");
+
+    int replace_all(std::string &haystack, const std::string &needle,
+            const std::string &val);
+
+    int replace_all(std::string &haystack, const std::string &needle,
+            const std::string &val)
+    {
+        size_t count = 0, pos = 0;
+        while ((pos = haystack.find(needle, pos)) != std::string::npos)
+        {
+            haystack.replace(pos, needle.size(), val);
+            // Move past the new value in case needle is a substring of val.
+            pos += val.size();
+            ++count;
+        }
+
+        return count;
+    }
 }
 
 namespace Options
