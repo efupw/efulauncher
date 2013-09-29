@@ -40,6 +40,12 @@ bool confirm()
     return c == 'y';
 }
 
+#ifdef _WIN32
+const std::string version("1.1.0");
+#else
+const std::string version("1.1.0");
+#endif
+
 int main(int argc, char *argv[])
 {
     CurlGlobalInit curl_global;
@@ -192,7 +198,8 @@ int main(int argc, char *argv[])
 
     EfuLauncher l(nwn_root_dir,
             "https://raw.github.com/commonquail/efulauncher/"\
-            "master/versioncheck");
+            "master/versioncheck",
+            version);
 
     if (l.has_update())
     {

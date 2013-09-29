@@ -15,11 +15,6 @@
 
 namespace
 {
-#ifdef _WIN32
-    const std::string version("1.1.0");
-#else
-    const std::string version("1.1.0");
-#endif
     const std::string listing("http://nwn.efupw.com/rootdir/index.dat");
 
     int replace_all(std::string &haystack, const std::string &needle,
@@ -57,10 +52,13 @@ namespace Options
     }
 };
 
-EfuLauncher::EfuLauncher(const std::string &path ,
-            const std::string &update_check):
+EfuLauncher::EfuLauncher(const std::string &path,
+            const std::string &update_check,
+            const std::string &version):
     m_path(path),
     m_update_check(update_check),
+    m_update_path(),
+    m_version(version),
     m_has_update(false)
 {
 }
@@ -100,7 +98,11 @@ bool EfuLauncher::has_update()
         if (Options::version(keyvals[0]))
         {
             const std::string version_test(keyvals[1]);
-            m_has_update = version_test != version;
+            m_has_update = version_test != m_version;
+            if (m_has_update)
+            {
+                m_version = version_test;
+            }
         }
         else if (Options::update_path(keyvals[0]))
         {
