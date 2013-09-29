@@ -197,6 +197,8 @@ CurlEasy::CurlEasy(const std::string &url):
 
     curlcheck(curl_easy_setopt(*m_pcurl, CURLOPT_URL, url.c_str()));
 
+    curlcheck(curl_easy_setopt(*m_pcurl, CURLOPT_FOLLOWLOCATION, 1L));
+
     // For hosts, 2 means verify, 0 means don't, and 1 is ignored!
     curlcheck(curl_easy_setopt(*m_pcurl, CURLOPT_SSL_VERIFYHOST, 2L));
 
