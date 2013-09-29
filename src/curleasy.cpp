@@ -13,6 +13,7 @@
 struct CurlEasy::progress_info
 {
     double lastruntime;
+    double dltotal;
     std::string sdltotal;
     CURL *curl;
 };
@@ -75,9 +76,10 @@ namespace
         curl_easy_getinfo(progress->curl,
                 CURLINFO_TOTAL_TIME, &curtime);
 
-        if (progress->sdltotal.empty() && dltotal)
+        if (dltotal && progress->dltotal != dltotal)
         {
             progress->sdltotal = sizetos(dltotal);
+            progress->dltotal = dltotal;
         }
 
         if (curtime - progress->lastruntime >= 0.5
@@ -246,6 +248,7 @@ void CurlEasy::progressbar(bool val)
 
     m_progress = std::shared_ptr<progress_info>(new progress_info);
     m_progress->lastruntime = 0.0;
+    m_progress->dltotal = 0.0;
     m_progress->sdltotal = "";
     m_progress->curl = *m_pcurl;
 
