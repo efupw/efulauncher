@@ -1,6 +1,6 @@
 CXXFLAGS_DEBUG=-DDEBUG
 CXXFLAGS_RELEASE=-O3
-CXXFLAGS=-Wall -Werror -std=c++11 -Dmd_md5 -include src/cpp11_compliance.h
+CXXFLAGS=-Wall -Werror -std=c++11 -Dmd_md5
 LDLIBS=-lcurl -lssl -lcrypto
 
 MODULES=curleasy efulauncher target main

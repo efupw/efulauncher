@@ -64,13 +64,7 @@ int main(int argc, char *argv[])
 
     std::cout << "Processing command line arguments." << std::endl;
 
-#ifdef CPP11_FOR_EACH
     for (const auto arg : args)
-#else
-    std::for_each(args.cbegin(), args.cend(),
-            [&cmd_line, &nwn_root_dir, &arg_errors]
-            (const std::string &arg)
-#endif
     {
         if (arg.find("-dmpass") == 0)
         {
@@ -107,9 +101,6 @@ int main(int argc, char *argv[])
             arg_errors = true;
         }
     }
-#ifndef CPP11_FOR_EACH
-    );
-#endif
     
     if (arg_errors)
     {

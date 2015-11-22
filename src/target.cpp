@@ -130,19 +130,11 @@ const std::string file_checksum(const std::string &path)
     std::stringstream calcsum;
     calcsum << std::setfill('0');
 
-#ifdef CPP11_FOR_EACH
     for (const unsigned char c : result)
-#else
-    std::for_each(std::begin(result), std::end(result),
-            [&calcsum](const unsigned char c)
-#endif
     {
         calcsum << std::hex << std::setw(2)
             << static_cast<unsigned int>(c);
     }
-#ifndef CPP11_FOR_EACH
-    );
-#endif
 
     return calcsum.str();
 }
