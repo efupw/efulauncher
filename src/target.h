@@ -13,15 +13,10 @@ strvec split(const std::string &s, char delim);
 
 const std::string file_checksum(const std::string &path);
 
-#ifdef CPP11_ENUM_CLASS
-#define ENUM_CLASS enum class
-#else
-#define ENUM_CLASS enum
-#endif
 class Target
 {
     public:
-        ENUM_CLASS Status {
+        enum class Status {
             Nonexistent,
             Outdated,
             Current

@@ -1,6 +1,6 @@
 RELEASE_FLAGS=/Ox
 DEBUG_FLAGS=/RTCsu /DDEBUG
-CXXFLAGS=/FIcpp11_compliance.h /EHsc \
+CXXFLAGS=/EHsc \
     /nologo /GS /Zc:forScope,auto /W4 /wd4482 /Dmd_md5 /DCURL_STATICLIB
 
 # Make sure to use /nologo on recursive calls. Done this way because

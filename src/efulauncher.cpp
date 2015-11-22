@@ -86,13 +86,12 @@ bool EfuLauncher::has_update()
 
     std::vector<std::string> lines(split(fetch, '\n'));
     fetch.clear();
-    for (auto beg = std::begin(lines), end = std::end(lines);
-            beg != end; ++beg)
+    for (const auto& line : lines)
     {
-        auto keyvals(split(*beg, '='));
+        auto keyvals(split(line, '='));
         if (keyvals.size() != 2)
         {
-            std::cerr << "Malformed option: " + *beg +
+            std::cerr << "Malformed option: " << line <<
                 ", aborting launcher update check." << std::endl;
             return m_has_update = false;
         }
@@ -170,27 +169,17 @@ void EfuLauncher::stat_targets()
 
     auto lines(split(fetch, '\n'));
     std::vector<Target> new_targets, old_targets;
-    for (auto beg = std::begin(lines), end = std::end(lines);
-            beg != end; ++beg)
+    for (const auto& line : lines)
     {
-        auto data(split(*beg, '@'));
+        auto data(split(line, '@'));
         Target t(path(), data[0], data[data.size() - 1]);
         auto status = t.status();
-// TODO
-#ifdef CPP11_ENUM_CLASS
+
         if (status == Target::Status::Nonexistent)
-#else
-        if (status == Target::Nonexistent)
-#endif
         {
             new_targets.push_back(std::move(t));
         }
-// TODO
-#ifdef CPP11_ENUM_CLASS
         else if (status == Target::Status::Outdated)
-#else
-        else if (status == Target::Outdated)
-#endif
         {
             old_targets.push_back(std::move(t));
         }
@@ -198,18 +187,10 @@ void EfuLauncher::stat_targets()
     if (new_targets.size())
     {
         std::cout << "New targets: " << new_targets.size() << std::endl;
-#ifdef CPP11_FOR_EACH
-        for (auto &t : new_targets)
-#else
-        std::for_each(new_targets.cbegin(), new_targets.cend(),
-            [](const Target &t)
-#endif
+        for (const auto &t : new_targets)
         {
             std::cout << "- " << t.name() << std::endl;
         }
-#ifndef CPP11_FOR_EACH
-        );
-#endif
     }
     else
     {
@@ -219,18 +200,10 @@ void EfuLauncher::stat_targets()
     if (old_targets.size())
     {
         std::cout << "Outdated targets: " << old_targets.size() << std::endl;
-#ifdef CPP11_FOR_EACH
-        for (auto &t : old_targets)
-#else
-        std::for_each(old_targets.cbegin(), old_targets.cend(),
-            [](const Target &t)
-#endif
+        for (const auto &t : old_targets)
         {
             std::cout << "- " << t.name() << std::endl;
         }
-#ifndef CPP11_FOR_EACH
-        );
-#endif
     }
     else
     {
@@ -238,28 +211,13 @@ void EfuLauncher::stat_targets()
     }
 
 #ifndef DEBUG
-#ifdef CPP11_FOR_EACH
     for (auto &t : new_targets)
-#else
-    std::for_each(new_targets.cbegin(), new_targets.cend(),
-        [](const Target &t)
-#endif
     {
         t.fetch();
     }
-#ifndef CPP11_FOR_EACH
-    );
-
-    std::for_each(old_targets.cbegin(), old_targets.cend(),
-        [](const Target &t)
-#else
     for (auto &t : old_targets)
-#endif
     {
         t.fetch();
     }
-#ifndef CPP11_FOR_EACH
-    );
-#endif
 #endif
 }
