@@ -2,10 +2,6 @@
 #include "curleasy.h"
 #endif
 
-#ifndef HEADER_SSL_H
-#include "openssl/ssl.h"
-#endif
-
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -29,13 +25,6 @@ namespace
             double dltotal, double dlnow,
             double ultotal, double ulnow);
 
-    /**
-     * Read an SSL certificate from memory. The certificate is hardcoded.
-     * Because the first and third arguments are not used they have been left
-     * unnamed.
-     */
-    CURLcode sslctxfunction(CURL *, void *sslctx, void *);
-    
     void curlcheck(CURLcode c);
 
     size_t writefunction(const char * const ptr, const size_t size, const size_t nmemb, void * const userdata)
@@ -116,70 +105,6 @@ namespace
         return 0;
     }
     
-    // PEM format certificates taken from
-    // http://curl.haxx.se/docs/caextract.html
-    std::string certs[] = {
-        "DigiCert High Assurance EV Root CA\n"\
-        "==================================\n"\
-        "-----BEGIN CERTIFICATE-----\n"\
-        "MIIDxTCCAq2gAwIBAgIQAqxcJmoLQJuPC3nyrkYldzANBgkqhkiG9w0BAQUFADBsMQswCQYDVQQG\n"\
-        "EwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3d3cuZGlnaWNlcnQuY29tMSsw\n"\
-        "KQYDVQQDEyJEaWdpQ2VydCBIaWdoIEFzc3VyYW5jZSBFViBSb290IENBMB4XDTA2MTExMDAwMDAw\n"\
-        "MFoXDTMxMTExMDAwMDAwMFowbDELMAkGA1UEBhMCVVMxFTATBgNVBAoTDERpZ2lDZXJ0IEluYzEZ\n"\
-        "MBcGA1UECxMQd3d3LmRpZ2ljZXJ0LmNvbTErMCkGA1UEAxMiRGlnaUNlcnQgSGlnaCBBc3N1cmFu\n"\
-        "Y2UgRVYgUm9vdCBDQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMbM5XPm+9S75S0t\n"\
-        "Mqbf5YE/yc0lSbZxKsPVlDRnogocsF9ppkCxxLeyj9CYpKlBWTrT3JTWPNt0OKRKzE0lgvdKpVMS\n"\
-        "OO7zSW1xkX5jtqumX8OkhPhPYlG++MXs2ziS4wblCJEMxChBVfvLWokVfnHoNb9Ncgk9vjo4UFt3\n"\
-        "MRuNs8ckRZqnrG0AFFoEt7oT61EKmEFBIk5lYYeBQVCmeVyJ3hlKV9Uu5l0cUyx+mM0aBhakaHPQ\n"\
-        "NAQTXKFx01p8VdteZOE3hzBWBOURtCmAEvF5OYiiAhF8J2a3iLd48soKqDirCmTCv2ZdlYTBoSUe\n"\
-        "h10aUAsgEsxBu24LUTi4S8sCAwEAAaNjMGEwDgYDVR0PAQH/BAQDAgGGMA8GA1UdEwEB/wQFMAMB\n"\
-        "Af8wHQYDVR0OBBYEFLE+w2kD+L9HAdSYJhoIAu9jZCvDMB8GA1UdIwQYMBaAFLE+w2kD+L9HAdSY\n"\
-        "JhoIAu9jZCvDMA0GCSqGSIb3DQEBBQUAA4IBAQAcGgaX3NecnzyIZgYIVyHbIUf4KmeqvxgydkAQ\n"\
-        "V8GK83rZEWWONfqe/EW1ntlMMUu4kehDLI6zeM7b41N5cdblIZQB2lWHmiRk9opmzN6cN82oNLFp\n"\
-        "myPInngiK3BD41VHMWEZ71jFhS9OMPagMRYjyOfiZRYzy78aG6A9+MpeizGLYAiJLQwGXFK3xPkK\n"\
-        "mNEVX58Svnw2Yzi9RKR/5CYrCsSXaQ3pjOLAEFe4yHYSkVXySGnYvCoCWw9E1CAx2/S6cCZdkGCe\n"\
-        "vEsXCS+0yx5DaMkHJ8HSXPfqIbloEpw8nL+e/IBcm2PN7EeqJSdnoDfzAIJ9VNep+OkuE6N36B9K\n"\
-        "-----END CERTIFICATE-----\n",
-        "Verisign Class 3 Public Primary Certification Authority - G2\n"\
-        "============================================================\n"\
-        "-----BEGIN CERTIFICATE-----\n"\
-        "MIIDAjCCAmsCEH3Z/gfPqB63EHln+6eJNMYwDQYJKoZIhvcNAQEFBQAwgcExCzAJBgNVBAYTAlVT\n"\
-        "MRcwFQYDVQQKEw5WZXJpU2lnbiwgSW5jLjE8MDoGA1UECxMzQ2xhc3MgMyBQdWJsaWMgUHJpbWFy\n"\
-        "eSBDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eSAtIEcyMTowOAYDVQQLEzEoYykgMTk5OCBWZXJpU2ln\n"\
-        "biwgSW5jLiAtIEZvciBhdXRob3JpemVkIHVzZSBvbmx5MR8wHQYDVQQLExZWZXJpU2lnbiBUcnVz\n"\
-        "dCBOZXR3b3JrMB4XDTk4MDUxODAwMDAwMFoXDTI4MDgwMTIzNTk1OVowgcExCzAJBgNVBAYTAlVT\n"\
-        "MRcwFQYDVQQKEw5WZXJpU2lnbiwgSW5jLjE8MDoGA1UECxMzQ2xhc3MgMyBQdWJsaWMgUHJpbWFy\n"\
-        "eSBDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eSAtIEcyMTowOAYDVQQLEzEoYykgMTk5OCBWZXJpU2ln\n"\
-        "biwgSW5jLiAtIEZvciBhdXRob3JpemVkIHVzZSBvbmx5MR8wHQYDVQQLExZWZXJpU2lnbiBUcnVz\n"\
-        "dCBOZXR3b3JrMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDMXtERXVxp0KvTuWpMmR9ZmDCO\n"\
-        "FoUgRm1HP9SFIIThbbP4pO0M8RcPO/mn+SXXwc+EY/J8Y8+iR/LGWzOOZEAEaMGAuWQcRXfH2G71\n"\
-        "lSk8UOg013gfqLptQ5GVj0VXXn7F+8qkBOvqlzdUMG+7AUcyM83cV5tkaWH4mx0ciU9cZwIDAQAB\n"\
-        "MA0GCSqGSIb3DQEBBQUAA4GBAFFNzb5cy5gZnBWyATl4Lk0PZ3BwmcYQWpSkU01UbSuvDV1Ai2TT\n"\
-        "1+7eVmGSX6bEHRBhNtMsJzzoKQm5EWR0zLVznxxIqbxhAe7iF6YM40AIOw7n60RzKprxaZLvcRTD\n"\
-        "Oaxxp5EJb+RxBrO6WVcmeQD2+A2iMzAo1KpYoJ2daZH9\n"\
-        "-----END CERTIFICATE-----\n"
-    };
-
-    CURLcode sslctxfunction(CURL * const, void * const sslctx, void * const)
-    {
-        X509_STORE *store = SSL_CTX_get_cert_store(static_cast<const SSL_CTX *>(sslctx));
-        for (auto beg = std::begin(certs); beg != std::end(certs); ++beg)
-        {
-            BIO *bio = BIO_new_mem_buf(const_cast<char *>(beg->c_str()),
-                beg->length());
-
-            // Read the PEM formatted certificate from memory into an X509
-            // struct that SSL can use.
-            X509 *cert = PEM_read_bio_X509(bio, nullptr, 0, nullptr);
-            if (!cert || X509_STORE_add_cert(store, cert) == 0)
-            {
-                return CURLE_SSL_CERTPROBLEM;
-            }
-        }
-        
-        return CURLE_OK ;
-    }
-    
     inline void curlcheck(const CURLcode c)
     {
         if (c != CURLE_OK)
@@ -222,9 +147,6 @@ CurlEasy::CurlEasy(const std::string &url):
     curlcheck(curl_easy_setopt(*m_pcurl, CURLOPT_SSL_VERIFYHOST, 2L));
 
     curlcheck(curl_easy_setopt(*m_pcurl, CURLOPT_SSL_VERIFYPEER, 1L));
-    
-    curlcheck(curl_easy_setopt(*m_pcurl, CURLOPT_SSL_CTX_FUNCTION,
-        &sslctxfunction));
 }
 
 CurlEasy::~CurlEasy()
