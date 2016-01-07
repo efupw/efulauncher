@@ -6,13 +6,12 @@
 class EfuLauncher
 {
     public:
-    // TODO: assignment, copy operator
         explicit EfuLauncher(const std::string &path,
                 const std::string &update_check,
                 const std::string &version);
         
-        //explicit EfuLauncher(std::string &&path,
-        //        std::string &&update_check);
+        EfuLauncher(const EfuLauncher&) = default;
+        EfuLauncher& operator=(const EfuLauncher&) = delete;
 
         bool has_update();
         bool get_update();
