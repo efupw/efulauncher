@@ -74,14 +74,17 @@ bool EfuLauncher::has_update()
     std::string fetch;
     CurlEasy curl(m_update_check.c_str());
     curl.write_to(fetch);
-    //TODO
     try
     {
         curl.perform();
     }
     catch (CurlEasyException &e)
     {
-        std::cout << e.what() << std::endl;
+        std::cerr
+            << "Update check failed. Could not establish secure connection to "
+            << m_update_check
+            << ": "
+            << e.what() << std::endl;
     }
 
     std::vector<std::string> lines(split(fetch, '\n'));
@@ -143,7 +146,20 @@ bool EfuLauncher::get_update()
     CurlEasy curl(m_update_path);
     curl.write_to(fetch);
     curl.progressbar(true);
-    curl.perform();
+    try
+    {
+        curl.perform();
+    }
+    catch (CurlEasyException &e)
+    {
+        std::cerr
+            << "Download failed. Could not establish secure connection to "
+            << m_update_path
+            << ": "
+            << e.what() << std::endl;
+
+        return false;
+    }
 
     std::ofstream ofs(dlpath, std::ios::binary);
     if (ofs)
