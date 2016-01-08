@@ -25,7 +25,7 @@ OBJS=$(OBJ_DIR)\main.obj\
     $(OBJ_DIR)\target.obj\
     $(OBJ_DIR)\efulauncher.obj
 
-LDLIBS=libcurl_a.lib libeay32MD.lib ssleay32MD.lib
+LDLIBS=libcurl_a.lib libeay32MD.lib
 
 # Build targets. Default build is debug. Build targets are all recursive
 # in order to setup correct directory structure and compile flags.
@@ -50,7 +50,7 @@ $(TARGET): $(OBJS)
     @ if not exist $(@D) mkdir $(@D)
     @ if exist $(RESOURCES) copy $(RESOURCES)\* $(@D)
     link /nologo /out:"$(TARGET)" $(OBJS) \
-        /libpath:"..\curl\builds\libcurl-vc10-x86-release-static-ssl-static-ipv6-spnego\lib" \
+        /libpath:"..\curl\builds\libcurl-vc-x86-release-static-ipv6-sspi-winssl\lib" \
         /libpath:"D:\Programmer\OpenSSL-Win32\lib\VC" \
         $(LDLIBS)
 
@@ -58,5 +58,5 @@ $(TARGET): $(OBJS)
     @ if not exist $(@D) mkdir $(@D)
     $(CXX) /c $(CXXFLAGS) /MD \
     /I"D:\Programmer\OpenSSL-Win32\include" \
-    /I"..\curl\builds\libcurl-vc10-x86-release-static-ssl-static-ipv6-spnego\include" \
+    /I"..\curl\builds\libcurl-vc-x86-release-static-ipv6-sspi-winssl\include" \
     $(<) /Fo"$(@)"
