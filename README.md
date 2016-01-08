@@ -21,8 +21,8 @@ Even if the launcher can't find your Neverwinter Nights installation and you did
 
 EfU Launcher depends on
 
-* libcurl (static)
-* OpenSSL (dynamic)
+* libcurl (static; dynamic in GNU/Linux build)
+* OpenSSL/libcrypto (static)
 
 All files needed to run the launcher are included in the archives. You will never need to keep files from one version of the launcher for another version.
 

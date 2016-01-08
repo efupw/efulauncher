@@ -1,14 +1,15 @@
 CXXFLAGS_DEBUG=-DDEBUG
 CXXFLAGS_RELEASE=-O3
 CXXFLAGS=-Wall -Werror -std=c++11 -Dmd_md5
-LDLIBS=-lcurl -lcrypto
+LDLIBS=-lcurl -ldl
 
 MODULES=curleasy efulauncher target main
 MODE=debug
 SRC_DIR=src
 BIN_DIR=bin
 OBJ_DIR=symbols
-OBJS=$(addprefix $(OBJ_DIR)/$(MODE)/,$(addsuffix .o,$(MODULES)))
+OBJS=$(addprefix $(OBJ_DIR)/$(MODE)/,$(addsuffix .o,$(MODULES))) \
+     /usr/lib/x86_64-linux-gnu/libcrypto.a
 TARGET=$(BIN_DIR)/$(MODE)/efulauncher
 
 RM=rm -f
