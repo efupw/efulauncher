@@ -16,7 +16,6 @@ SYMBOLS=symbols
 OBJ_DIR=$(SYMBOLS)\$(MODE)
 BINARY=bin
 TARGET=$(BINARY)\$(MODE)\EfULauncher.exe
-RESOURCES=res
 
 OBJS=$(OBJ_DIR)\main.obj\
     $(OBJ_DIR)\curleasy.obj\
@@ -25,7 +24,7 @@ OBJS=$(OBJ_DIR)\main.obj\
     $(OBJ_DIR)\target.obj\
     $(OBJ_DIR)\efulauncher.obj
 
-LDLIBS=libcurl_a.lib libeay32MD.lib
+LDLIBS=libcurl_a.lib libeay32MD.lib gdi32.lib User32.lib
 
 # Build targets. Default build is debug. Build targets are all recursive
 # in order to setup correct directory structure and compile flags.
@@ -48,10 +47,9 @@ clobber: clean
 
 $(TARGET): $(OBJS)
     @ if not exist $(@D) mkdir $(@D)
-    @ if exist $(RESOURCES) copy $(RESOURCES)\* $(@D)
     link /nologo /out:"$(TARGET)" $(OBJS) \
         /libpath:"..\curl\builds\libcurl-vc-x86-release-static-ipv6-sspi-winssl\lib" \
-        /libpath:"D:\Programmer\OpenSSL-Win32\lib\VC" \
+        /libpath:"D:\Programmer\OpenSSL-Win32\lib\VC\static" \
         $(LDLIBS)
 
 {$(SOURCES)}.cpp{$(OBJ_DIR)}.obj:
