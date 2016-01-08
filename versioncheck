@@ -1,4 +1,4 @@
-version=1.2.0
-win-version=1.2.0
-lin-version=1.2.0
+version=1.2.1
+win-version=1.2.1
+lin-version=1.2.1
 update path=https://github.com/efupw/efulauncher/releases/download/v{version}/efulauncher-{platform}-{version}.7z
