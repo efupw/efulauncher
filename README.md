@@ -43,5 +43,5 @@ You can make a shortcut to the launcher and put any arguments in the Target fiel
 MIT/Expat
 
 [efupw]: http://www.efupw.com
-[releases]: https://github.com/commonquail/efulauncher/releases
+[releases]: https://github.com/efupw/efulauncher/releases
 [7zip]: http://7-zip.com/

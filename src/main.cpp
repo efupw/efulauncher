@@ -43,7 +43,7 @@ bool confirm()
 #ifdef _WIN32
 const std::string version("1.2.0");
 #else
-const std::string version("1.2.0");
+const std::string version("1.1.0");
 #endif
 
 int main(int argc, char *argv[])
@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
 #endif
 
     EfuLauncher l(nwn_root_dir,
-            "https://raw.github.com/commonquail/efulauncher/"\
+            "https://raw.github.com/efupw/efulauncher/"
             "master/versioncheck",
             version);
 
